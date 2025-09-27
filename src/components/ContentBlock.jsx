@@ -1,167 +1,50 @@
-import React, { useState } from "react";
-import EditForm from "./EditForm";
+import React from 'react';
+import { useGuide } from '../context/GuideContext';
+import EditForm from './EditForm';
 
-const ContentBlock = ({ 
-  block,
-  blockIndex,
-  blocksLength,
-  chapterId, 
-  sectionId, 
-  isEditMode, 
-  onUpdateContentBlock, 
-  onDeleteContentBlock,
-  onReorderContentBlock
-}) => {
-  const [editingBlock, setEditingBlock] = useState(false);
-  if (!block || !block.type || !block.data) {
-    return null;
-  }
+// Props are minimal, just for identification
+export default function ContentBlock({ chapterId, sectionId, block, blockIndex, totalBlocks }) {
+  const {
+    isEditMode,
+    handleUpdateContentBlock,
+    handleDeleteContentBlock,
+    handleReorderContentBlock
+  } = useGuide();
 
-  const handleEditBlock = () => {
-    setEditingBlock(true);
-  };
-
-  const handleSaveBlock = (updatedData) => {
-    onUpdateContentBlock(chapterId, sectionId, block.id, updatedData);
-    setEditingBlock(false);
-  };
-
-  const handleDeleteBlock = () => {
-    if (window.confirm('Are you sure you want to delete this content block?')) {
-      onDeleteContentBlock(chapterId, sectionId, block.id);
-    }
-  };
-
-  const handleReorderBlock = (direction) => {
-    onReorderContentBlock(chapterId, sectionId, blockIndex, direction);
-  };
-
-  const renderEditControls = () => {
-    if (!isEditMode) return null;
-    
-    return (
-      <div className="item-controls content-controls">
-        <div className="reorder-controls">
-          <button
-            onClick={() => handleReorderBlock('up')}
-            className="reorder-btn"
-            disabled={blockIndex === 0}
-            title="Move block up"
-          >
-            ↑
-          </button>
-          <button
-            onClick={() => handleReorderBlock('down')}
-            className="reorder-btn"
-            disabled={blockIndex === blocksLength - 1}
-            title="Move block down"
-          >
-            ↓
-          </button>
-        </div>
-        <button
-          onClick={handleEditBlock}
-          className="edit-btn"
-          title="Edit content block"
-        >
-          ✏️
-        </button>
-        <button
-          onClick={handleDeleteBlock}
-          className="delete-btn"
-          title="Delete content block"
-        >
-          🗑️
-        </button>
-      </div>
-    );
-  };
-
-  const renderContent = () => {
+  const renderViewMode = () => {
     switch (block.type) {
       case 'text':
-        return (
-          <div className="content-block text-block">
-            {renderEditControls()}
-            <p>{block.data.text}</p>
-          </div>
-        );
-
+        return <p>{block.data.text}</p>;
       case 'image':
-        return (
-          <div className="content-block image-block">
-            {renderEditControls()}
-            <figure>
-              <img 
-                src={block.data.url} 
-                alt={block.data.caption || "Content image"} 
-                className="content-image"
-              />
-              {block.data.caption && (
-                <figcaption className="image-caption">
-                  {block.data.caption}
-                </figcaption>
-              )}
-            </figure>
-          </div>
-        );
-
+        return <figure><img src={block.data.url} alt={block.data.caption} /><figcaption>{block.data.caption}</figcaption></figure>;
       case 'video':
-        return (
-          <div className="content-block video-block">
-            {renderEditControls()}
-            <iframe
-              src={block.data.embedUrl}
-              title={block.data.description || "Video content"}
-              frameBorder="0"
-              allowFullScreen
-              className="content-video"
-            ></iframe>
-            {block.data.description && (
-              <p className="video-description">{block.data.description}</p>
-            )}
-          </div>
-        );
-
+        return <iframe src={block.data.embedUrl} title={block.data.description} frameBorder="0" allowFullScreen></iframe>;
       case 'link':
-        return (
-          <div className="content-block link-block">
-            {renderEditControls()}
-            <a
-              href={block.data.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="content-link"
-            >
-              {block.data.displayText}
-            </a>
-          </div>
-        );
-
+        return <a href={block.data.url} target="_blank" rel="noopener noreferrer">{block.data.displayText}</a>;
       default:
-        console.warn(`Unknown content block type: ${block.type}`);
-        return (
-          <div className="content-block unknown-block">
-            {renderEditControls()}
-            <p>Unknown content type: {block.type}</p>
-          </div>
-        );
+        return <div>Unsupported block type</div>;
     }
   };
 
   return (
-    <>
-      {renderContent()}
-      {editingBlock && (
+    <div className="content-block">
+      {isEditMode ? (
         <EditForm
-          entityData={block.data}
-          entityType={block.type}
-          onSave={handleSaveBlock}
-          onCancel={() => setEditingBlock(false)}
+          data={block.data}
+          onSave={(newData) => handleUpdateContentBlock(chapterId, sectionId, block.id, newData)}
+          blockType={block.type}
         />
+      ) : (
+        renderViewMode()
       )}
-    </>
-  );
-};
 
-export default ContentBlock;
+      {isEditMode && (
+        <div className="edit-controls">
+          <button onClick={() => handleDeleteContentBlock(chapterId, sectionId, block.id)}>Delete Block</button>
+          <button onClick={() => handleReorderContentBlock(chapterId, sectionId, blockIndex, 'up')} disabled={blockIndex === 0}>Up</button>
+          <button onClick={() => handleReorderContentBlock(chapterId, sectionId, blockIndex, 'down')} disabled={blockIndex === totalBlocks - 1}>Down</button>
+        </div>
+      )}
+    </div>
+  );
+}
