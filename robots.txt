@@ -1,0 +1,4 @@
+# Monday.com Interactive Guide Application
+# This is an internal application for Monday.com users
+User-agent: *
+Disallow: /
