@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0073ea" />
+    <meta
+      name="description"
+      content="מדריך אינטראקטיבי לפיתוח - אפליקציית Monday.com לניהול ולמידה מתקדמת"
+    />
+    <meta name="keywords" content="monday.com, מדריך, אינטראקטיבי, פיתוח, לימוד, ניהול" />
+    <meta name="author" content="Monday.com Development Team" />
+    
+    <!-- Open Graph Meta Tags for Social Sharing -->
+    <meta property="og:title" content="מדריך אינטראקטיבי - Monday.com" />
+    <meta property="og:description" content="מדריך אינטראקטיבי לפיתוח ולמידה עם Monday.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/logo512.png" />
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Preconnect to improve performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <title>מדריך אינטראקטיבי | Monday.com</title>
+  </head>
+  <body>
+    <noscript>
+      <div style="text-align: center; padding: 50px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+        <h1>🚫 JavaScript נדרש</h1>
+        <p>כדי להשתמש במדריך האינטראקטיבי, יש צורך לאפשר JavaScript בדפדפן שלך.</p>
+        <p>אנא אפשר JavaScript ורענן את הדף.</p>
+        <br>
+        <p><strong>Monday.com Interactive Guide</strong></p>
+      </div>
+    </noscript>
+    
+    <!-- Loading Screen -->
+    <div id="initial-loader" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      z-index: 9999;
+    ">
+      <div style="
+        width: 60px;
+        height: 60px;
+        border: 4px solid #e2e8f0;
+        border-top: 4px solid #0073ea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      "></div>
+      <h2 style="color: #1a202c; margin: 0; font-weight: 600;">טוען מדריך אינטראקטיבי...</h2>
+      <p style="color: #4a5568; margin: 10px 0 0 0;">Monday.com Guide Application</p>
+    </div>
+    
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+    
+    <div id="root"></div>
+    <script type="module" src="/src/index.jsx"></script>
+    
+    <script>
+      // Hide loader when React app loads
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          const loader = document.getElementById('initial-loader');
+          if (loader) {
+            loader.style.opacity = '0';
+            loader.style.transition = 'opacity 0.5s ease-out';
+            setTimeout(function() {
+              loader.remove();
+            }, 500);
+          }
+        }, 1000);
+      });
+    </script>
+  </body>
+</html>

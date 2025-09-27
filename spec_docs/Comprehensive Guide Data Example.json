@@ -1,0 +1,90 @@
+{
+    "homePage": {
+      "title": "Welcome to the Ultimate Learning Guide!",
+      "content": "This guide provides a comprehensive overview of modern web development, from foundational principles to advanced techniques. Click on a chapter to begin your journey."
+    },
+    "chapters": [
+      {
+        "id": "chap_1",
+        "title": "Chapter 1: The Foundations",
+        "content": "Understanding the core building blocks of the web: HTML, CSS, and JavaScript. This chapter covers the essentials for any aspiring developer.",
+        "sections": [
+          {
+            "id": "sec_1a",
+            "title": "Introduction to Core Technologies",
+            "content": "Before we dive deep, let's review the role of each core technology. This section provides a high-level overview.",
+            "contentBlocks": [
+              {
+                "id": "block_txt_001",
+                "type": "text",
+                "data": {
+                  "text": "HTML provides the structure, CSS handles the styling and presentation, and JavaScript brings interactivity and dynamic behavior to web pages. Mastering the synergy between these three is the key to effective web development."
+                }
+              },
+              {
+                "id": "block_img_001",
+                "type": "image",
+                "data": {
+                  "url": "https://placehold.co/800x400/a2d2ff/1e293b?text=Web+Technology+Stack",
+                  "caption": "A visual representation of the core web technologies."
+                }
+              }
+            ]
+          },
+          {
+            "id": "sec_1b",
+            "title": "Exploring Rich Content",
+            "content": "The web is not just about text and images. Modern applications seamlessly integrate various media types to create engaging user experiences.",
+            "contentBlocks": [
+              {
+                "id": "block_vid_001",
+                "type": "video",
+                "data": {
+                  "embedUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                  "description": "A short video explaining the concept of component-based architecture."
+                }
+              },
+              {
+                "id": "block_lnk_001",
+                "type": "link",
+                "data": {
+                  "url": "https://developer.mozilla.org/en-US/",
+                  "displayText": "Visit the MDN Web Docs for comprehensive documentation"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chap_2",
+        "title": "Chapter 2: Introduction to React",
+        "content": "A deep dive into the React library. We will explore concepts like JSX, components, state, and props to build powerful user interfaces.",
+        "sections": [
+          {
+            "id": "sec_2a",
+            "title": "Why React?",
+            "content": "This section discusses the advantages of using React for building modern, scalable single-page applications (SPAs).",
+            "contentBlocks": [
+              {
+                "id": "block_txt_002",
+                "type": "text",
+                "data": {
+                  "text": "React's declarative nature and component-based structure make it easier to reason about your application and build complex UIs. The virtual DOM provides significant performance benefits."
+                }
+              },
+              {
+                "id": "block_lnk_002",
+                "type": "link",
+                "data": {
+                  "url": "https://react.dev/",
+                  "displayText": "Check out the official React documentation"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  
