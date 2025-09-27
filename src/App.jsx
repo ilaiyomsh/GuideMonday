@@ -45,7 +45,7 @@ const App = () => {
         // NOTICE: No more props are needed for HomePage!
         return <HomePage onNavigate={handleNavigate} />;
       case 'chapter':
-        const chapter = guideData.chapters.find(c => c.id === active.id);
+        const chapter = guideData.chapters.find(c => c.id === activePage.id);
         if (!chapter) {
             handleNavigate('home');
             return null;
