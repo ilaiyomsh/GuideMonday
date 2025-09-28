@@ -4,7 +4,13 @@
   "private": true,
   "description": "מדריך אינטראקטיבי לפיתוח ולמידה עם Monday.com",
   "author": "Monday.com Development Team",
-  "keywords": ["monday.com", "interactive", "guide", "tutorial", "learning"],
+  "keywords": [
+    "monday.com",
+    "interactive",
+    "guide",
+    "tutorial",
+    "learning"
+  ],
   "homepage": ".",
   "scripts": {
     "start": "npm run stop && concurrently \"npm run server\" \"npm run expose\"",
@@ -19,7 +25,9 @@
   },
   "dependencies": {
     "@mondaycom/apps-sdk": "^2.1.2",
-    "@vibe/core": "^3.19.0",
+    "@vibe/core": "^3.68.4",
+    "@vibe/icons": "^1.11.0",
+    "classnames": "^2.5.1",
     "monday-sdk-js": "^0.5.5"
   },
   "eslintConfig": {

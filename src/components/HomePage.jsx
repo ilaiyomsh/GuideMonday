@@ -1,57 +1,122 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGuide } from '../context/GuideContext';
-import EditForm from './EditForm'; // Assuming EditForm might be used here
+import { Edit } from '@vibe/icons';
 
-// NOTICE: The only prop left is 'onNavigate' which is local to App's state
 export default function HomePage({ onNavigate }) {
-  // Get everything needed from the global context
-  const {
-    guideData,
-    isEditMode,
-    handleUpdateHomePage,
-    handleUpdateChapter,
-    handleDeleteChapter,
-    handleReorderChapter,
-    handleAddChapter
-  } = useGuide();
+  const { guideData, isEditMode, setIsEditMode, handleSave, handleUpdateHomePage } = useGuide();
+  const [isEditingHomePage, setIsEditingHomePage] = useState(false);
+  const [homePageData, setHomePageData] = useState({
+    title: guideData?.homePage?.title || 'ברוכים הבאים',
+    content: guideData?.homePage?.content || ''
+  });
 
-  const { homePage, chapters } = guideData;
+  if (!guideData) return <div>Loading home page...</div>;
 
-  if (!homePage) return <div>Loading home page...</div>;
+  const handleChapterClick = (chapterId) => {
+    onNavigate('chapter-page', chapterId);
+  };
+
+  const handleEditModeToggle = () => {
+    setIsEditMode(!isEditMode);
+  };
+
+  const handleSaveClick = async () => {
+    await handleSave();
+  };
+
+  const handleEditHomePage = () => {
+    setIsEditingHomePage(true);
+    setHomePageData({
+      title: guideData.homePage?.title || 'ברוכים הבאים',
+      content: guideData.homePage?.content || ''
+    });
+  };
+
+  const handleSaveHomePage = () => {
+    handleUpdateHomePage(homePageData);
+    setIsEditingHomePage(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingHomePage(false);
+    setHomePageData({
+      title: guideData.homePage?.title || 'ברוכים הבאים',
+      content: guideData.homePage?.content || ''
+    });
+  };
 
   return (
     <div className="home-page">
-      {isEditMode ? (
-        <EditForm
-          data={{ title: homePage.title, content: homePage.content }}
-          onSave={(newData) => handleUpdateHomePage(newData)}
-        />
-      ) : (
-        <header className="home-header">
-          <h1>{homePage.title}</h1>
-          <p>{homePage.content}</p>
-        </header>
-      )}
-
-      <div className="chapter-list">
-        <h2>Chapters</h2>
-        {chapters && chapters.map((chapter, index) => (
-          <div key={chapter.id} className="chapter-item">
-            <h3 onClick={() => onNavigate('chapter', chapter.id)}>{chapter.title}</h3>
-            {isEditMode && (
-              <div className="edit-controls">
-                <button onClick={() => handleDeleteChapter(chapter.id)}>Delete</button>
-                <button onClick={() => handleReorderChapter(index, 'up')} disabled={index === 0}>Up</button>
-                <button onClick={() => handleReorderChapter(index, 'down')} disabled={index === chapters.length - 1}>Down</button>
-              </div>
-            )}
+      <header className="page-header">
+        {isEditingHomePage ? (
+          <div className="edit-form">
+            <input
+              type="text"
+              value={homePageData.title}
+              onChange={(e) => setHomePageData({...homePageData, title: e.target.value})}
+              className="edit-input title-input"
+              placeholder="כותרת דף הבית"
+            />
+            <textarea
+              value={homePageData.content}
+              onChange={(e) => setHomePageData({...homePageData, content: e.target.value})}
+              className="edit-textarea"
+              placeholder="תוכן דף הבית"
+              rows="3"
+            />
+            <div className="edit-actions">
+              <button className="save-edit-button" onClick={handleSaveHomePage}>
+                שמור
+              </button>
+              <button className="cancel-edit-button" onClick={handleCancelEdit}>
+                ביטול
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="page-header-content">
+            <div className="header-text">
+              <h1>{guideData.homePage?.title || 'ברוכים הבאים'}</h1>
+              {guideData.homePage?.content && (
+                <p className="home-content">{guideData.homePage.content}</p>
+              )}
+              {isEditMode && (
+                <button className="edit-content-button" onClick={handleEditHomePage} title="ערוך">
+                  <Edit />
+                </button>
+              )}
+            </div>
+            <div className="edit-toggle-container">
+              <span>מצב עריכה</span>
+              <label className="toggle-switch">
+                <input 
+                  type="checkbox" 
+                  checked={isEditMode} 
+                  onChange={handleEditModeToggle}
+                />
+                <span className="slider"></span>
+              </label>
+              {isEditMode && (
+                <button className="save-button" onClick={handleSaveClick}>
+                  שמור
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </header>
+      
+      <div className="chapter-grid">
+        {guideData.chapters && guideData.chapters.map((chapter, index) => (
+          <div 
+            key={chapter.id} 
+            className="chapter-card"
+            onClick={() => handleChapterClick(chapter.id)}
+          >
+            <h2>{index + 1}. {chapter.title}</h2>
+            <p>{chapter.description || chapter.content || 'תיאור הפרק יופיע כאן'}</p>
           </div>
         ))}
-        {isEditMode && (
-          <button onClick={handleAddChapter} className="add-btn">
-            + Add Chapter
-          </button>
-        )}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useMondayApi } from './useMondayApi'; // Ensure you have created this file as demonstrated
 
 // Helper function to generate unique IDs
@@ -16,6 +16,7 @@ export const useGuideManager = () => {
 
   // Manage the core state of the application
   const [guideData, setGuideData] = useState(null);
+  const [originalData, setOriginalData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   
@@ -25,18 +26,30 @@ export const useGuideManager = () => {
       setIsLoading(true);
       const data = await fetchGuide();
       setGuideData(data);
+      setOriginalData(JSON.parse(JSON.stringify(data))); // Deep copy for comparison
       setIsLoading(false);
     };
     loadInitialData();
   }, [fetchGuide]);
+
+  // Calculate if there are unsaved changes
+  const hasChanges = useMemo(() => {
+    return () => {
+      if (!guideData || !originalData) return false;
+      return JSON.stringify(guideData) !== JSON.stringify(originalData);
+    };
+  }, [guideData, originalData]);
   
   // Save function that calls the API and handles exiting edit mode
   const handleSave = async () => {
     if (!guideData) return;
     const success = await saveApi(guideData);
     if (success) {
+      setOriginalData(JSON.parse(JSON.stringify(guideData))); // Update original data after successful save
       setIsEditMode(false);
+      return true;
     }
+    return false;
   };
 
   // --- CRUD & Reordering Handlers ---
@@ -80,6 +93,27 @@ export const useGuideManager = () => {
     }));
   };
 
+  const handleUpdateContentBlock = (chapterId, sectionId, blockId, newData) => {
+    setGuideData(prevData => ({
+      ...prevData,
+      chapters: prevData.chapters.map(chapter => {
+        if (chapter.id !== chapterId) return chapter;
+        return {
+          ...chapter,
+          sections: chapter.sections.map(section => {
+            if (section.id !== sectionId) return section;
+            return {
+              ...section,
+              contentBlocks: section.contentBlocks.map(block =>
+                block.id === blockId ? { ...block, data: newData } : block
+              )
+            };
+          })
+        };
+      })
+    }));
+  };
+
   const handleDeleteSection = (chapterId, sectionId) => {
     setGuideData(prevData => ({
       ...prevData,
@@ -93,26 +127,6 @@ export const useGuideManager = () => {
     }));
   };
 
-  const handleUpdateContentBlock = (chapterId, sectionId, blockId, newData) => {
-    setGuideData(prevData => ({
-      ...prevData,
-      chapters: prevData.chapters.map(chapter => {
-        if (chapter.id !== chapterId) return chapter;
-        return {
-          ...chapter,
-          sections: chapter.sections.map(section => {
-            if (section.id !== sectionId) return section;
-            return {
-              ...section,
-              contentBlocks: section.contentBlocks.map(block =>
-                block.id === blockId ? { ...block, data: { ...block.data, ...newData } } : block
-              )
-            };
-          })
-        };
-      })
-    }));
-  };
 
   const handleDeleteContentBlock = (chapterId, sectionId, blockId) => {
     setGuideData(prevData => ({
@@ -251,6 +265,7 @@ export const useGuideManager = () => {
     isLoading,
     isEditMode,
     setIsEditMode,
+    hasChanges,
     handleSave,
     handleUpdateHomePage,
     handleUpdateChapter,

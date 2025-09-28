@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תצוגה מקדימה של GuideMonday - גרסה מלאה</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- VIBE Design System by monday.com --- */
+        :root {
+            --primary-color: #0073ea;
+            --primary-hover-color: #0060b9;
+            --primary-text-color: #323338;
+            --secondary-text-color: #676879;
+            --border-color: #d0d4e4;
+            --surface-color: #ffffff;
+            --neutral-background-color: #f5f6f8;
+            --toggle-inactive-color: #c5c7d0;
+            --danger-color: #e2445c;
+            
+            --font-family-base: 'Figtree', sans-serif;
+            
+            --spacing-small: 8px;
+            --spacing-medium: 16px;
+            --spacing-large: 24px;
+            --spacing-xlarge: 32px;
+            
+            --border-radius-small: 4px;
+            --border-radius-medium: 6px;
+            --border-radius-pill: 99em;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            font-family: var(--font-family-base);
+            background-color: var(--surface-color);
+            color: var(--primary-text-color);
+        }
+
+        #root {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .App {
+            display: flex;
+            height: 100vh;
+            text-align: right;
+            background-color: var(--surface-color);
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--neutral-background-color);
+            padding: var(--spacing-medium);
+            color: var(--primary-text-color);
+            overflow-y: auto;
+            border-left: 1px solid var(--border-color);
+            transition: width 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            margin-bottom: var(--spacing-large);
+            padding: var(--spacing-small) var(--spacing-medium);
+        }
+        
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--primary-text-color);
+        }
+
+        .sidebar nav {
+            flex-grow: 1;
+        }
+
+        .sidebar nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: var(--spacing-small);
+        }
+        
+        .sidebar .nav-link {
+            display: block;
+            padding: 10px var(--spacing-medium);
+            font-weight: 500;
+            color: var(--primary-text-color);
+            text-decoration: none;
+            border-radius: var(--border-radius-medium);
+            transition: background-color 0.2s;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(0, 115, 234, 0.1);
+        }
+        
+         .sidebar .nav-link.active {
+            background-color: rgba(0, 115, 234, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .chapter-item {
+            display: flex;
+            align-items: center;
+            border-radius: var(--border-radius-medium);
+            transition: background-color 0.2s;
+        }
+        
+        .chapter-item:hover {
+            background-color: rgba(0, 115, 234, 0.05);
+        }
+
+        .chapter-title-link {
+            flex-grow: 1;
+            padding: 10px var(--spacing-medium);
+            padding-left: 0;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--primary-text-color);
+        }
+        
+        .chapter-accordion-toggle {
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chapter-accordion-toggle svg {
+            transition: transform 0.3s ease;
+        }
+        
+        .chapter-accordion-toggle.active svg {
+             transform: rotate(90deg);
+        }
+        
+        .sidebar .accordion-content {
+            list-style-type: none;
+            padding-right: var(--spacing-medium);
+            margin-top: var(--spacing-small);
+            border-right: 1px solid var(--border-color);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .sidebar .accordion-content.open {
+            max-height: 500px;
+        }
+
+        .sidebar nav ul ul li a:before {
+            right: -1px;
+        }
+        
+        .sidebar nav ul ul li a.active:before {
+             background-color: var(--primary-color);
+        }
+
+        .page-view.hidden {
+            display: none;
+        }
+        
+        .main-content {
+            flex-grow: 1;
+            padding: var(--spacing-xlarge) 60px;
+            overflow-y: auto;
+            background-color: var(--surface-color);
+        }
+        
+        .home-page .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-large);
+        }
+
+        .home-page .chapter-card {
+            background-color: var(--neutral-background-color);
+            border-radius: var(--border-radius-medium);
+            padding: var(--spacing-large);
+            text-decoration: none;
+            color: var(--primary-text-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid var(--border-color);
+        }
+        
+        .home-page .chapter-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .home-page .chapter-card h2 {
+            font-size: 1.25rem;
+            margin: 0 0 var(--spacing-small) 0;
+        }
+        
+        .home-page .chapter-card p {
+            font-size: 0.9rem;
+            color: var(--secondary-text-color);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: var(--spacing-large);
+            margin-bottom: var(--spacing-xlarge);
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+            color: var(--primary-text-color);
+            margin: 0;
+            font-weight: 700;
+        }
+        
+        .edit-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-medium);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--toggle-inactive-color);
+            transition: .3s;
+            border-radius: var(--border-radius-pill);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px; width: 20px;
+            left: 2px; bottom: 2px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        
+        .section-accordion-toggle {
+            font-size: 1.5rem;
+            color: var(--primary-text-color);
+            padding: var(--spacing-medium) 0;
+            margin: 0;
+            font-weight: 700;
+            width: 100%;
+            border: none; background: none; text-align: right;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .section-accordion-toggle .accordion-icon { transition: transform 0.3s ease; }
+        .section-accordion-toggle.active .accordion-icon { transform: rotate(180deg); }
+
+        .section .accordion-content {
+            padding-top: var(--spacing-large);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out;
+        }
+        
+        .section .accordion-content.open { max-height: 2000px; }
+        
+        .content-block {
+            position: relative;
+            margin-bottom: var(--spacing-large);
+            padding: var(--spacing-medium);
+            border: 1px solid transparent;
+            border-radius: var(--border-radius-medium);
+        }
+        
+        .edit-mode-active .content-block { border-color: var(--border-color); }
+        .block-image img { max-width: 100%; height: auto; border-radius: var(--border-radius-medium); border: 1px solid var(--border-color); }
+        .block-code pre { background-color: var(--neutral-background-color); padding: var(--spacing-large); border-radius: var(--border-radius-medium); overflow-x: auto; font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace; font-size: 0.875rem; border: 1px solid var(--border-color); }
+        .block-video .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: var(--border-radius-medium); }
+        .block-video .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        .block-controls {
+            display: none; position: absolute; top: -16px; left: 8px;
+            background-color: white; border-radius: var(--border-radius-medium);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10;
+        }
+        
+        .edit-mode-active .content-block:hover .block-controls { display: flex; align-items: center; }
+        .control-button { background: none; border: none; cursor: pointer; padding: var(--spacing-small); display: flex; align-items: center; justify-content: center; }
+        .control-button:hover { background-color: var(--neutral-background-color); }
+        .control-button svg { width: 18px; height: 18px; color: var(--secondary-text-color); }
+        .control-button.delete:hover svg { color: var(--danger-color); }
+        
+        .add-controls-container { display: none; margin-top: var(--spacing-large); border: 1px dashed var(--border-color); border-radius: var(--border-radius-medium); padding: var(--spacing-small); }
+        .add-block-controls { display: flex; justify-content: center; gap: var(--spacing-small); }
+        .add-block-button { background: none; border: 1px solid transparent; cursor: pointer; border-radius: var(--border-radius-medium); padding: var(--spacing-small); display: flex; align-items: center; justify-content: center; }
+        .add-block-button:hover { background-color: var(--neutral-background-color); border-color: var(--border-color); }
+        .add-block-button svg { width: 24px; height: 24px; color: var(--secondary-text-color); }
+
+        .edit-mode-active .add-controls-container { display: block; }
+        
+        .add-item-button {
+            display: none;
+            width: 100%;
+            padding: var(--spacing-medium);
+            margin-top: var(--spacing-large);
+            border: 1px solid var(--primary-color);
+            border-radius: var(--border-radius-medium);
+            background-color: transparent;
+            color: var(--primary-color);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .add-item-button:hover {
+             background-color: rgba(0, 115, 234, 0.05);
+        }
+        
+        .edit-mode-active .add-item-button {
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="App">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h1>מדריך מקיף לפיתוח Web</h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#" class="nav-link active" data-page="home-page">עמוד הבית</a></li>
+                        <li>
+                            <div class="chapter-item">
+                                <span class="chapter-title-link nav-link" data-page="chapter-page">1. מבוא ל-HTML</span>
+                                <button class="chapter-accordion-toggle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                </button>
+                            </div>
+                            <ul class="accordion-content">
+                                <li><a href="#" class="nav-link" data-page="chapter-page">1.1 מהו HTML?</a></li>
+                                <li><a href="#" class="nav-link" data-page="chapter-page">1.2 אלמנטים ותגים</a></li>
+                            </ul>
+                        </li>
+                         <li>
+                            <div class="chapter-item">
+                                <span class="chapter-title-link nav-link" data-page="chapter-page">2. עיצוב עם CSS</span>
+                                <button class="chapter-accordion-toggle">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                </button>
+                            </div>
+                             <ul class="accordion-content">
+                                <li><a href="#" class="nav-link" data-page="chapter-page">2.1 יסודות ה-CSS</a></li>
+                             </ul>
+                        </li>
+                    </ul>
+                </nav>
+                <button class="add-item-button">+ הוסף פרק</button>
+            </aside>
+            <main class="main-content">
+                
+                <div id="home-page" class="page-view home-page">
+                    <header class="page-header">
+                        <h1>ברוכים הבאים</h1>
+                         <div class="edit-toggle-container">
+                            <span>מצב עריכה</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="edit-mode-toggle-home">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </header>
+                    <div class="chapter-grid">
+                        <a href="#" class="chapter-card nav-link" data-page="chapter-page">
+                            <h2>1. מבוא ל-HTML</h2>
+                            <p>היסודות של בניית דפי אינטרנט. נלמד על תגים, אלמנטים ומבנה בסיסי של מסמך HTML.</p>
+                        </a>
+                         <a href="#" class="chapter-card nav-link" data-page="chapter-page">
+                            <h2>2. עיצוב עם CSS</h2>
+                            <p>איך להוסיף סטייל לדפים. נכיר סלקטורים, מאפיינים ודרכים לעצב את האתר שלנו.</p>
+                        </a>
+                         <a href="#" class="chapter-card nav-link" data-page="chapter-page">
+                            <h2>3. אינטראקטיביות עם JavaScript</h2>
+                            <p>הוספת התנהגות דינמית לדפים. נלמד על משתנים, פונקציות ואיך לשנות את הדף בזמן אמת.</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="chapter-page" class="page-view hidden">
+                    <header class="page-header">
+                        <h1>1. מבוא ל-HTML</h1>
+                        <div class="edit-toggle-container">
+                            <span>מצב עריכה</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="edit-mode-toggle-chapter">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </header>
+                    <div class="sections-container">
+                        <section class="section">
+                             <button class="section-accordion-toggle active">
+                                <span>1.1 מהו HTML?</span>
+                                <svg class="accordion-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            </button>
+                            <div class="accordion-content open">
+                                <div class="content-block block-text">
+                                     <div class="block-controls">
+                                        <button class="control-button move-up"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z"></path></svg></button>
+                                        <button class="control-button move-down"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"></path></svg></button>
+                                        <button class="control-button delete"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"></path></svg></button>
+                                    </div>
+                                    <p>HTML (HyperText Markup Language) הוא שפת הסימון הסטנדרטית ליצירת דפי אינטרנט.</p>
+                                </div>
+                                <div class="add-controls-container">
+                                    <div class="add-block-controls">
+                                        <button class="add-block-button" title="הוסף טקסט"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.17,18 15,18V19H9V18C9.83,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z"></path></svg></button>
+                                        <button class="add-block-button" title="הוסף תמונה"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21,19V5C21,3.89 20.1,3 19,3H5C3.89,3 3,3.89 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5Z"></path></svg></button>
+                                        <button class="add-block-button" title="הוסף וידאו"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z"></path></svg></button>
+                                        <button class="add-block-button" title="הוסף GIF"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9,9H7.5V15H9V9M13,9H10.5V15H13V13H11.5V12H13V10.5H11.5V9.5H13V9M17,9H14V15H17V12.5H15.5V14H15V10.5H17V9Z"></path></svg></button>
+                                        <button class="add-block-button" title="הוסף קישור"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z"></path></svg></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <button class="add-item-button">+ הוסף סעיף</button>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = document.querySelector('.App');
+            const editModeToggles = [document.getElementById('edit-mode-toggle-home'), document.getElementById('edit-mode-toggle-chapter')];
+            
+            // --- Accordion Logic (Sidebar & Sections) ---
+            app.addEventListener('click', function(event) {
+                // Sidebar Chapter Accordion
+                const sidebarToggle = event.target.closest('.chapter-accordion-toggle');
+                if (sidebarToggle) {
+                    const content = sidebarToggle.parentElement.nextElementSibling;
+                    sidebarToggle.classList.toggle('active');
+                    content.classList.toggle('open');
+                    return; 
+                }
+
+                // Chapter Section Accordion
+                const sectionToggle = event.target.closest('.section-accordion-toggle');
+                if (sectionToggle) {
+                    const content = sectionToggle.nextElementSibling;
+                    sectionToggle.classList.toggle('active');
+                    content.classList.toggle('open');
+                }
+            });
+
+            // --- Page Navigation Logic ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page-view');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const targetPageId = link.getAttribute('data-page');
+                    if (!targetPageId) return;
+
+                    // Update active link state
+                    navLinks.forEach(navLink => navLink.classList.remove('active'));
+                    link.classList.add('active');
+                     // Also activate parent chapter title if a section is clicked
+                    const parentChapter = link.closest('.accordion-content');
+                    if(parentChapter) {
+                        const chapterLink = parentChapter.previousElementSibling.querySelector('.chapter-title-link');
+                        if (chapterLink) chapterLink.classList.add('active');
+                    }
+
+                    // Switch page view
+                    pages.forEach(page => {
+                        page.id === targetPageId ? page.classList.remove('hidden') : page.classList.add('hidden');
+                    });
+                });
+            });
+
+            // --- Edit Mode Toggle Logic ---
+            const syncToggles = (changedToggle) => {
+                const isChecked = changedToggle.checked;
+                editModeToggles.forEach(toggle => {
+                    if (toggle !== changedToggle) {
+                        toggle.checked = isChecked;
+                    }
+                });
+                app.classList.toggle('edit-mode-active', isChecked);
+            };
+
+            editModeToggles.forEach(toggle => {
+                toggle.addEventListener('change', () => syncToggles(toggle));
+            });
+        });
+    </script>
+</body>
+</html>
+

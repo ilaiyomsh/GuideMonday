@@ -1,80 +1,64 @@
-import React, { useState, useEffect } from "react";
-import "./App.css";
-import "@vibe/core/tokens";
-import mondaySdk from "monday-sdk-js";
+import React, { useState, useEffect } from 'react';
+import './App.css';
+import { useGuide } from './context/GuideContext.jsx';
 
-// Import the custom hook FROM THE CONTEXT that provides all the logic
-import { useGuide } from './context/GuideContext'; 
+import Sidebar from './components/Sidebar';
+import HomePage from './components/HomePage';
+import ChapterPage from './components/ChapterPage';
+import { Loader, Box } from '@vibe/core';
 
-// Import presentational components
-import Sidebar from "./components/Sidebar";
-import HomePage from "./components/HomePage";
-import ChapterPage from "./components/ChapterPage";
+export default function App() {
+  const { guideData, isLoading, isEditMode } = useGuide();
+  const [currentPage, setCurrentPage] = useState('home-page');
+  const [currentChapterId, setCurrentChapterId] = useState(null);
 
-const monday = mondaySdk();
-
-const App = () => {
-  const [activePage, setActivePage] = useState({ type: 'home', id: null });
-  const [context, setContext] = useState();
-  
-  // Now we get everything we need from our new useGuide hook!
-  // No more "prop drilling". App component is clean.
-  const { guideData, isLoading, setIsEditMode, handleSave, isEditMode } = useGuide();
-
-  useEffect(() => {
-    monday.listen("context", (res) => {
-      setContext(res.data);
-    });
-  }, []);
-
-  const handleNavigate = (type, id = null) => {
-    setActivePage({ type, id });
-  };
-  
-  if (isLoading || !guideData) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"><div className="spinner"></div><p>Loading your guide...</p></div>
-      </div>
-    );
-  }
-
-  const renderMainContent = () => {
-    switch (activePage.type) {
-      case 'home':
-        // NOTICE: No more props are needed for HomePage!
-        return <HomePage onNavigate={handleNavigate} />;
-      case 'chapter':
-        const chapter = guideData.chapters.find(c => c.id === activePage.id);
-        if (!chapter) {
-            handleNavigate('home');
-            return null;
-        }
-        // NOTICE: No more props are needed for ChapterPage!
-        return <ChapterPage chapter={chapter} />;
-      default:
-        return <HomePage onNavigate={handleNavigate} />;
+  const handleNavigate = (pageType, chapterId = null) => {
+    if (pageType === 'home-page') {
+      setCurrentPage('home-page');
+      setCurrentChapterId(null);
+    } else if (pageType === 'chapter-page' && chapterId) {
+      setCurrentPage('chapter-page');
+      setCurrentChapterId(chapterId);
     }
   };
 
+  const currentChapter = guideData?.chapters?.find(ch => ch.id === currentChapterId);
+
+  if (isLoading || !guideData) {
+    return (
+      <Box 
+        className="loading-container"
+        style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh' 
+        }}
+      >
+        <Loader size={Loader.sizes.LARGE} />
+      </Box>
+    );
+  }
+
   return (
-    <div className="App">
-      <div className="app-header">
-        <div className="header-controls">
-          <button onClick={() => setIsEditMode(!isEditMode)} className={`toggle-edit-btn ${isEditMode ? 'active' : ''}`}>
-            {isEditMode ? '👁️ View Mode' : '✏️ Edit Mode'}
-          </button>
-          {isEditMode && (<button onClick={handleSave} className="save-btn">💾 Save Changes</button>)}
+    <div className={`App ${isEditMode ? 'edit-mode-active' : ''}`}>
+      <aside className="sidebar">
+        <Sidebar 
+          currentPage={currentPage}
+          currentChapterId={currentChapterId}
+          onNavigate={handleNavigate}
+        />
+      </aside>
+      
+      <main className="main-content">
+        <div id="home-page" className={`page-view ${currentPage === 'home-page' ? '' : 'hidden'}`}>
+          <HomePage onNavigate={handleNavigate} />
         </div>
-      </div>
-      <div className="app-layout">
-        <Sidebar onNavigate={handleNavigate} activePageId={activePage.id} />
-        <main className="main-content">
-          {renderMainContent()}
-        </main>
-      </div>
+
+        <div id="chapter-page" className={`page-view ${currentPage === 'chapter-page' ? '' : 'hidden'}`}>
+          <ChapterPage chapter={currentChapter} onNavigate={handleNavigate} />
+        </div>
+      </main>
     </div>
   );
-};
-
-export default App;
+}

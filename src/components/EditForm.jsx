@@ -1,10 +1,10 @@
 import React, { useState } from "react";
+import { Button, TextField, TextArea, Flex, Box, Heading } from '@vibe/core';
 
-const EditForm = ({ entityData, entityType, onSave, onCancel }) => {
-  const [formData, setFormData] = useState(entityData);
+const EditForm = ({ data, type, onSave, onCancel }) => {
+  const [formData, setFormData] = useState(data || {});
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -14,172 +14,164 @@ const EditForm = ({ entityData, entityType, onSave, onCancel }) => {
   };
 
   const renderFields = () => {
-    switch (entityType) {
+    switch (type) {
       case 'text':
         return (
-          <textarea
-            name="text"
+          <TextArea
             value={formData.text || ''}
-            onChange={handleChange}
+            onChange={(value) => handleChange('text', value)}
             placeholder="Enter text content..."
-            className="edit-textarea"
             rows={4}
           />
         );
       
       case 'image':
         return (
-          <>
-            <input
-              name="url"
+          <Flex direction={Flex.directions.COLUMN} gap={16}>
+            <TextField
               value={formData.url || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('url', value)}
               placeholder="Image URL"
-              className="edit-input"
+              title="Image URL"
             />
-            <input
-              name="caption"
+            <TextField
               value={formData.caption || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('caption', value)}
               placeholder="Image caption"
-              className="edit-input"
+              title="Caption"
             />
-          </>
+          </Flex>
         );
       
       case 'video':
         return (
-          <>
-            <input
-              name="embedUrl"
+          <Flex direction={Flex.directions.COLUMN} gap={16}>
+            <TextField
               value={formData.embedUrl || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('embedUrl', value)}
               placeholder="Video embed URL"
-              className="edit-input"
+              title="Video URL"
             />
-            <input
-              name="description"
+            <TextField
               value={formData.description || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('description', value)}
               placeholder="Video description"
-              className="edit-input"
+              title="Description"
             />
-          </>
+          </Flex>
         );
       
       case 'link':
         return (
-          <>
-            <input
-              name="url"
+          <Flex direction={Flex.directions.COLUMN} gap={16}>
+            <TextField
               value={formData.url || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('url', value)}
               placeholder="Link URL"
-              className="edit-input"
+              title="URL"
             />
-            <input
-              name="displayText"
+            <TextField
               value={formData.displayText || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('displayText', value)}
               placeholder="Display text"
-              className="edit-input"
+              title="Display Text"
             />
-          </>
+          </Flex>
         );
       
       case 'homePage':
         return (
-          <>
-            <input
-              name="title"
+          <Flex direction={Flex.directions.COLUMN} gap={16}>
+            <TextField
               value={formData.title || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('title', value)}
               placeholder="Home page title"
-              className="edit-input"
+              title="Title"
             />
-            <textarea
-              name="content"
+            <TextArea
               value={formData.content || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('content', value)}
               placeholder="Home page description"
-              className="edit-textarea"
               rows={4}
             />
-          </>
+          </Flex>
         );
 
       case 'chapter':
         return (
-          <>
-            <input
-              name="title"
+          <Flex direction={Flex.directions.COLUMN} gap={16}>
+            <TextField
               value={formData.title || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('title', value)}
               placeholder="Chapter title"
-              className="edit-input"
+              title="Title"
             />
-            <textarea
-              name="content"
+            <TextArea
               value={formData.content || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('content', value)}
               placeholder="Chapter description"
-              className="edit-textarea"
               rows={3}
             />
-          </>
+          </Flex>
         );
       
       case 'section':
         return (
-          <>
-            <input
-              name="title"
+          <Flex direction={Flex.directions.COLUMN} gap={16}>
+            <TextField
               value={formData.title || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('title', value)}
               placeholder="Section title"
-              className="edit-input"
+              title="Title"
             />
-            <textarea
-              name="content"
+            <TextArea
               value={formData.content || ''}
-              onChange={handleChange}
+              onChange={(value) => handleChange('content', value)}
               placeholder="Section content"
-              className="edit-textarea"
               rows={3}
             />
-          </>
+          </Flex>
         );
       
       default:
         return (
-          <div className="unknown-entity">
-            <p>Unknown entity type: {entityType}</p>
-          </div>
+          <Box>
+            <p>Unknown entity type: {type}</p>
+          </Box>
         );
     }
   };
 
   return (
-    <div className="edit-form-overlay">
-      <div className="edit-form">
-        <div className="edit-form-header">
-          <h3>Edit {entityType}</h3>
-        </div>
+    <Box 
+      padding={24} 
+      border 
+      rounded 
+      backgroundColor={Box.backgroundColors.PRIMARY_BACKGROUND_COLOR}
+    >
+      <Flex direction={Flex.directions.COLUMN} gap={24}>
+        <Heading type={Heading.types.H4} value={`Edit ${type}`} />
+        
         <form onSubmit={handleSubmit}>
-          <div className="form-fields">
+          <Flex direction={Flex.directions.COLUMN} gap={24}>
             {renderFields()}
-          </div>
-          <div className="form-actions">
-            <button type="submit" className="save-changes-btn">
-              Save Changes
-            </button>
-            <button type="button" onClick={onCancel} className="cancel-btn">
-              Cancel
-            </button>
-          </div>
+            
+            <Flex gap={12} justify={Flex.justify.END}>
+              <Button 
+                kind={Button.kinds.TERTIARY} 
+                onClick={onCancel}
+                type="button"
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                Save Changes
+              </Button>
+            </Flex>
+          </Flex>
         </form>
-      </div>
-    </div>
+      </Flex>
+    </Box>
   );
 };
 
