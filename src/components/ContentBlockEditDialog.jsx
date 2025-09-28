@@ -22,6 +22,18 @@ export default function ContentBlockEditDialog({
     }
   }, [block]);
 
+  // Close color palette when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showColorPalette && !event.target.closest('.color-picker-container')) {
+        setShowColorPalette(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showColorPalette]);
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -131,18 +143,6 @@ export default function ContentBlockEditDialog({
       setFormData(prev => ({ ...prev, content: editor.innerHTML }));
     }
   };
-
-  // Close color palette when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showColorPalette && !event.target.closest('.color-picker-container')) {
-        setShowColorPalette(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [showColorPalette]);
 
   const renderFormFields = () => {
     switch (block.type) {
