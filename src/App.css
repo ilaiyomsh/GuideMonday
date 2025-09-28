@@ -716,6 +716,7 @@ input:checked + .slider:before {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  direction: rtl;
 }
 
 .modal-header {
@@ -910,6 +911,7 @@ input:checked + .slider:before {
   font-size: 1rem;
   color: var(--primary-text-color);
   unicode-bidi: bidi-override;
+  writing-mode: horizontal-tb;
 }
 
 .rich-text-content p {
@@ -1031,6 +1033,7 @@ input:checked + .slider:before {
   direction: rtl;
   text-align: right;
   unicode-bidi: bidi-override;
+  writing-mode: horizontal-tb;
 }
 
 .rich-text-editor:focus {
