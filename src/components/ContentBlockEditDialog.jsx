@@ -12,6 +12,8 @@ export default function ContentBlockEditDialog({
   const { handleUpdateContentBlock } = useGuide();
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
+  const [showColorPalette, setShowColorPalette] = useState(false);
+  const [savedRange, setSavedRange] = useState(null);
 
   useEffect(() => {
     if (block) {
@@ -74,8 +76,12 @@ export default function ContentBlockEditDialog({
   };
 
   const handleSave = () => {
-    if (validateForm()) {
-      handleUpdateContentBlock(chapterId, sectionId, block.id, formData);
+    // Capture final HTML content from the rich text editor
+    const editor = document.getElementById('rich-text-editor');
+    if (editor) {
+      const finalContent = editor.innerHTML;
+      const updatedData = { ...formData, content: finalContent };
+      handleUpdateContentBlock(chapterId, sectionId, block.id, updatedData);
       onClose();
     }
   };
@@ -92,6 +98,40 @@ export default function ContentBlockEditDialog({
     return `${size}px`;
   };
 
+  // Rich Text Editor Functions
+  const saveSelection = () => {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      setSavedRange(selection.getRangeAt(0));
+    }
+  };
+
+  const restoreSelection = () => {
+    if (savedRange) {
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(savedRange);
+    }
+  };
+
+  const toggleColorPalette = () => {
+    saveSelection();
+    setShowColorPalette(!showColorPalette);
+  };
+
+  const selectColor = (color) => {
+    restoreSelection();
+    document.execCommand('foreColor', false, color);
+    setShowColorPalette(false);
+  };
+
+  const handleEditorInput = () => {
+    const editor = document.getElementById('rich-text-editor');
+    if (editor) {
+      setFormData(prev => ({ ...prev, content: editor.innerHTML }));
+    }
+  };
+
   const renderFormFields = () => {
     switch (block.type) {
       case 'text':
@@ -99,28 +139,28 @@ export default function ContentBlockEditDialog({
           <>
             <div className="form-field">
               <label htmlFor="text">טקסט *</label>
-              <div className="text-editor-container">
-                <div className="text-formatting-toolbar">
+              <div className="rich-text-editor-container">
+                <div className="rich-text-toolbar">
                   <button
                     type="button"
-                    className={`format-button ${formData.bold ? 'active' : ''}`}
-                    onClick={() => handleInputChange('bold', !formData.bold)}
+                    className="toolbar-button"
+                    onClick={() => document.execCommand('bold', false, null)}
                     title="מודגש"
                   >
                     <strong>B</strong>
                   </button>
                   <button
                     type="button"
-                    className={`format-button ${formData.italic ? 'active' : ''}`}
-                    onClick={() => handleInputChange('italic', !formData.italic)}
+                    className="toolbar-button"
+                    onClick={() => document.execCommand('italic', false, null)}
                     title="נטוי"
                   >
                     <em>I</em>
                   </button>
                   <button
                     type="button"
-                    className={`format-button ${formData.underline ? 'active' : ''}`}
-                    onClick={() => handleInputChange('underline', !formData.underline)}
+                    className="toolbar-button"
+                    onClick={() => document.execCommand('underline', false, null)}
                     title="קו תחתון"
                   >
                     <u>U</u>
@@ -128,50 +168,10 @@ export default function ContentBlockEditDialog({
                   
                   <div className="toolbar-separator"></div>
                   
-                  <div className="color-picker-container">
-                    <div className="color-matrix">
-                      {[
-                        '#000000', '#333333', '#666666', '#999999',
-                        '#ff0000', '#ff6600', '#ffcc00', '#ffff00',
-                        '#00ff00', '#00ccff', '#0066ff', '#6600ff',
-                        '#ff00ff', '#ff0066', '#ff3366', '#ff6699'
-                      ].map(color => (
-                        <button
-                          key={color}
-                          type="button"
-                          className={`color-option ${formData.textColor === color ? 'selected' : ''}`}
-                          style={{ backgroundColor: color }}
-                          onClick={() => handleInputChange('textColor', color)}
-                          title={`צבע ${color}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="toolbar-separator"></div>
-                  
-                  <select
-                    value={formData.fontSize || '16'}
-                    onChange={(e) => handleInputChange('fontSize', e.target.value)}
-                    className="font-size-select"
-                    title="גודל גופן"
-                  >
-                    <option value="12">12</option>
-                    <option value="14">14</option>
-                    <option value="16">16</option>
-                    <option value="18">18</option>
-                    <option value="20">20</option>
-                    <option value="24">24</option>
-                    <option value="28">28</option>
-                    <option value="32">32</option>
-                  </select>
-                  
-                  <div className="toolbar-separator"></div>
-                  
                   <button
                     type="button"
-                    className={`format-button ${formData.bulletList ? 'active' : ''}`}
-                    onClick={() => handleInputChange('bulletList', !formData.bulletList)}
+                    className="toolbar-button"
+                    onClick={() => document.execCommand('insertUnorderedList', false, null)}
                     title="רשימה עם נקודות"
                   >
                     <span className="bullet-icon">•</span>
@@ -179,8 +179,8 @@ export default function ContentBlockEditDialog({
                   
                   <button
                     type="button"
-                    className={`format-button ${formData.numberedList ? 'active' : ''}`}
-                    onClick={() => handleInputChange('numberedList', !formData.numberedList)}
+                    className="toolbar-button"
+                    onClick={() => document.execCommand('insertOrderedList', false, null)}
                     title="רשימה ממוספרת"
                   >
                     <span className="numbered-icon">1.</span>
@@ -189,41 +189,72 @@ export default function ContentBlockEditDialog({
                   <div className="toolbar-separator"></div>
                   
                   <select
-                    value={formData.alignment || 'right'}
-                    onChange={(e) => handleInputChange('alignment', e.target.value)}
+                    onChange={(e) => document.execCommand('fontSize', false, e.target.value)}
+                    className="font-size-select"
+                    title="גודל גופן"
+                  >
+                    <option value="1">קטן</option>
+                    <option value="2">בינוני</option>
+                    <option value="3" selected>גדול</option>
+                    <option value="4">גדול מאוד</option>
+                    <option value="5">ענק</option>
+                    <option value="6">ענק מאוד</option>
+                    <option value="7">מאסיבי</option>
+                  </select>
+                  
+                  <div className="toolbar-separator"></div>
+                  
+                  <div className="color-picker-container">
+                    <button
+                      type="button"
+                      className="color-trigger-button"
+                      onClick={toggleColorPalette}
+                      title="צבע טקסט"
+                    >
+                      <span className="color-icon">A</span>
+                    </button>
+                    {showColorPalette && (
+                      <div className="color-palette">
+                        {[
+                          '#000000', '#333333', '#666666', '#999999',
+                          '#ff0000', '#ff6600', '#ffcc00', '#ffff00',
+                          '#00ff00', '#00ccff', '#0066ff', '#6600ff',
+                          '#ff00ff', '#ff0066', '#ff3366', '#ff6699'
+                        ].map(color => (
+                          <button
+                            key={color}
+                            type="button"
+                            className="color-option"
+                            style={{ backgroundColor: color }}
+                            onClick={() => selectColor(color)}
+                            title={`צבע ${color}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="toolbar-separator"></div>
+                  
+                  <select
+                    onChange={(e) => document.execCommand('justifyLeft', false, null)}
                     className="alignment-select"
                     title="יישור טקסט"
                   >
-                    <option value="right">ימין</option>
-                    <option value="center">מרכז</option>
-                    <option value="left">שמאל</option>
-                    <option value="justify">יישור לשני הצדדים</option>
+                    <option value="justifyLeft">שמאל</option>
+                    <option value="justifyCenter">מרכז</option>
+                    <option value="justifyRight">ימין</option>
+                    <option value="justifyFull">יישור לשני הצדדים</option>
                   </select>
                 </div>
                 
-                <div className="text-preview-container">
-                  <div 
-                    className="text-preview"
-                    style={{
-                      textAlign: formData.alignment || 'right',
-                      fontWeight: formData.bold ? 'bold' : 'normal',
-                      fontStyle: formData.italic ? 'italic' : 'normal',
-                      textDecoration: formData.underline ? 'underline' : 'none',
-                      color: formData.textColor || '#000000',
-                      fontSize: getFontSize(formData.fontSize || 'medium')
-                    }}
-                  >
-                    {formData.text || 'הזינו את הטקסט כאן...'}
-                  </div>
-                </div>
-                
-                <textarea
-                  id="text"
-                  value={formData.text || ''}
-                  onChange={(e) => handleInputChange('text', e.target.value)}
-                  className={errors.text ? 'error' : ''}
-                  rows="6"
-                  placeholder="הזינו את הטקסט..."
+                <div
+                  id="rich-text-editor"
+                  className="rich-text-editor"
+                  contentEditable={true}
+                  suppressContentEditableWarning={true}
+                  onInput={handleEditorInput}
+                  dangerouslySetInnerHTML={{ __html: formData.content || '' }}
                 />
               </div>
               {errors.text && <span className="error-message">{errors.text}</span>}

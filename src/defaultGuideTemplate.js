@@ -14,21 +14,13 @@ export const DEFAULT_GUIDE_TEMPLATE = {
           "title": "כניסה למצב עריכה",
           "content": "רק בעלי לוח יכולים לערוך את המדריך. למדו כיצד להפעיל את מצב העריכה ולהתחיל לערוך.",
           "contentBlocks": [
-            {
-              "id": "block_txt_001",
-              "type": "text",
-              "data": {
-                "text": "1. חפשו את כפתור 'ערוך מדריך' בחלק העליון של המסך (מוצג רק לבעלי לוח).\n2. לחצו על הכפתור כדי להפעיל את מצב העריכה.\n3. כעת תראו כפתורי עריכה ליד כל אלמנט שניתן לערוך.",
-                        "bold": false,
-                        "italic": false,
-                        "underline": false,
-                        "textColor": "#000000",
-                        "fontSize": "16",
-                        "bulletList": false,
-                        "numberedList": false,
-                        "alignment": "right"
-              }
-            },
+                    {
+                      "id": "block_txt_001",
+                      "type": "text",
+                      "data": {
+                        "content": "<p>1. חפשו את כפתור 'ערוך מדריך' בחלק העליון של המסך (מוצג רק לבעלי לוח).</p><p>2. לחצו על הכפתור כדי להפעיל את מצב העריכה.</p><p>3. כעת תראו כפתורי עריכה ליד כל אלמנט שניתן לערוך.</p>"
+                      }
+                    },
             {
               "id": "block_img_001",
               "type": "image",

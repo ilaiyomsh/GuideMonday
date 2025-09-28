@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGuide } from '../context/GuideContext';
 import { MoveArrowUp, MoveArrowDown, Delete, Edit } from '@vibe/icons';
 import ContentBlockEditDialog from './ContentBlockEditDialog';
+import DOMPurify from 'dompurify';
 
 export default function ContentBlock({ block, isEditMode, chapterId, sectionId, blockIndex, totalBlocks }) {
   const { handleDeleteContentBlock, handleReorderContentBlock } = useGuide();
@@ -94,20 +95,13 @@ export default function ContentBlock({ block, isEditMode, chapterId, sectionId, 
   const renderContent = () => {
     switch (block.type) {
       case 'text':
+        const htmlContent = block.data.content || block.data.text || '';
+        const sanitizedHTML = DOMPurify.sanitize(htmlContent);
         return (
           <div 
-            className="text-content"
-            style={{
-              textAlign: block.data.alignment || 'right',
-              fontWeight: block.data.bold ? 'bold' : 'normal',
-              fontStyle: block.data.italic ? 'italic' : 'normal',
-              textDecoration: block.data.underline ? 'underline' : 'none',
-              color: block.data.textColor || '#000000',
-              fontSize: getFontSize(block.data.fontSize || 'medium')
-            }}
-          >
-            {renderTextWithFormatting(block.data)}
-          </div>
+            className="text-content rich-text-content"
+            dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
+          />
         );
       case 'image':
         return (

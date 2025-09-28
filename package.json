@@ -28,6 +28,7 @@
     "@vibe/core": "^3.68.4",
     "@vibe/icons": "^1.11.0",
     "classnames": "^2.5.1",
+    "dompurify": "^3.2.7",
     "monday-sdk-js": "^0.5.5"
   },
   "eslintConfig": {
