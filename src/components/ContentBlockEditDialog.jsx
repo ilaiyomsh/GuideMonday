@@ -145,17 +145,21 @@ export default function ContentBlockEditDialog({
                     type="button"
                     className="toolbar-button"
                     onClick={() => document.execCommand('bold', false, null)}
-                    title="מודגש"
+                    title="הדגשה"
                   >
-                    <strong>B</strong>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M15.6,10.79c.97-.67,1.65-1.77,1.65-2.79,0-2.26-1.75-4-4.25-4H7v14h7.04c2.1,0,3.71-1.7,3.71-3.78,0-1.52-.86-2.82-2.15-3.43M10,6.5h3c.83,0,1.5.67,1.5,1.5s-.67,1.5-1.5,1.5h-3V6.5m3.5,9H10v-3h3.5c.83,0,1.5.67,1.5,1.5s-.67,1.5-1.5,1.5Z"></path>
+                    </svg>
                   </button>
                   <button
                     type="button"
                     className="toolbar-button"
                     onClick={() => document.execCommand('italic', false, null)}
-                    title="נטוי"
+                    title="הטיה"
                   >
-                    <em>I</em>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M10,4v3h2.21l-3.42,8H6v3h8v-3h-2.21l3.42-8H18V4H10Z"></path>
+                    </svg>
                   </button>
                   <button
                     type="button"
@@ -163,68 +167,110 @@ export default function ContentBlockEditDialog({
                     onClick={() => document.execCommand('underline', false, null)}
                     title="קו תחתון"
                   >
-                    <u>U</u>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12,17c3.31,0,6-2.69,6-6V3h-2.5v8c0,1.93-1.57,3.5-3.5,3.5S8.5,12.93,8.5,11V3H6v8c0,3.31,2.69,6,6,6M5,19v2h14v-2H5Z"></path>
+                    </svg>
                   </button>
-                  
-                  <div className="toolbar-separator"></div>
-                  
                   <button
                     type="button"
                     className="toolbar-button"
                     onClick={() => document.execCommand('insertUnorderedList', false, null)}
-                    title="רשימה עם נקודות"
+                    title="רשימת נקודות"
                   >
-                    <span className="bullet-icon">•</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7,5h14v2H7V5M7,11h14v2H7V11M7,17h14v2H7V17M3,5h2v2H3V5M3,11h2v2H3V11M3,17h2v2H3V17Z"></path>
+                    </svg>
                   </button>
-                  
                   <button
                     type="button"
                     className="toolbar-button"
                     onClick={() => document.execCommand('insertOrderedList', false, null)}
                     title="רשימה ממוספרת"
                   >
-                    <span className="numbered-icon">1.</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7,5h14v2H7V5M7,11h14v2H7V11M7,17h14v2H7V17M3.5,5.5L2,4v3H5V5.5H3.5m0,4.5L2,8.5v3h3V10H3.5m.5,5.5H2v-1.5l1,.5L4,14v-3h1.5v4.5h-2Z"></path>
+                    </svg>
                   </button>
-                  
-                  <div className="toolbar-separator"></div>
-                  
+                  <button
+                    type="button"
+                    className="toolbar-button"
+                    onClick={() => document.execCommand('justifyLeft', false, null)}
+                    title="יישור לשמאל"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M15,15H3v2h12V15m0-8H3v2h12V7M3,13h18v-2H3v2M3,21h18v-2H3v2M3,3V5h18V3H3Z"></path>
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    className="toolbar-button"
+                    onClick={() => document.execCommand('justifyCenter', false, null)}
+                    title="יישור למרכז"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7,15v2h10v-2H7m-4,6h18v-2H3v2m0-8h18v-2H3v2m4-6v2h10V7H7M3,3v2h18V3H3Z"></path>
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    className="toolbar-button"
+                    onClick={() => document.execCommand('justifyRight', false, null)}
+                    title="יישור לימין"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9,15v2h12v-2H9m-6,6h18v-2H3v2m6-8h12v-2H9v2m-6-6v2h18V7H3M3,3v2h18V3H3Z"></path>
+                    </svg>
+                  </button>
+                  <select
+                    onChange={(e) => document.execCommand('fontName', false, e.target.value)}
+                    className="font-select"
+                    title="גופן"
+                  >
+                    <option value="Arial">Arial</option>
+                    <option value="Figtree, sans-serif" selected>Figtree</option>
+                    <option value="Roboto, sans-serif">Roboto</option>
+                    <option value="Open Sans, sans-serif">Open Sans</option>
+                    <option value="Merriweather, serif">Merriweather</option>
+                    <option value="Courier Prime, monospace">Courier</option>
+                    <option value="Times New Roman, serif">Times New Roman</option>
+                  </select>
                   <select
                     onChange={(e) => document.execCommand('fontSize', false, e.target.value)}
                     className="font-size-select"
                     title="גודל גופן"
                   >
-                    <option value="1">קטן</option>
-                    <option value="2">בינוני</option>
-                    <option value="3" selected>גדול</option>
-                    <option value="4">גדול מאוד</option>
-                    <option value="5">ענק</option>
-                    <option value="6">ענק מאוד</option>
-                    <option value="7">מאסיבי</option>
+                    <option value="2">קטן</option>
+                    <option value="3" selected>רגיל</option>
+                    <option value="4">בינוני</option>
+                    <option value="5">גדול</option>
+                    <option value="6">גדול מאוד</option>
                   </select>
-                  
-                  <div className="toolbar-separator"></div>
-                  
                   <div className="color-picker-container">
                     <button
                       type="button"
-                      className="color-trigger-button"
+                      className="toolbar-button"
                       onClick={toggleColorPalette}
-                      title="צבע טקסט"
+                      title="צבע גופן"
                     >
-                      <span className="color-icon">A</span>
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9.62,12L12,5.67L14.37,12M11,3L5.5,17H7.5L8.62,14H15.37L16.5,17H18.5L13,3H11M21,19V22H3V19H21Z"></path>
+                      </svg>
                     </button>
                     {showColorPalette && (
                       <div className="color-palette">
                         {[
-                          '#000000', '#333333', '#666666', '#999999',
-                          '#ff0000', '#ff6600', '#ffcc00', '#ffff00',
-                          '#00ff00', '#00ccff', '#0066ff', '#6600ff',
-                          '#ff00ff', '#ff0066', '#ff3366', '#ff6699'
+                          '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
+                          '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
+                          '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
+                          '#dd7e6b', '#ea9999', '#f9cb9c', '#ffe599', '#b6d7a8', '#a2c4c9', '#a4c2f4', '#9fc5e8', '#b4a7d6', '#d5a6bd',
+                          '#d0442f', '#e06666', '#f6b26b', '#ffd966', '#93c47d', '#76a5af', '#6d9eeb', '#6fa8dc', '#8e7cc3', '#c27ba0',
+                          '#a61c00', '#cc0000', '#e69138', '#f1c232', '#6aa84f', '#45818e', '#3c78d8', '#3d85c6', '#674ea7', '#a64d79',
+                          '#85200c', '#990000', '#b45f06', '#bf9000', '#38761d', '#134f5c', '#0b5394', '#351c75', '#741b47',
+                          '#5b0f00', '#660000', '#783f04', '#7f6000', '#274e13', '#0c343d', '#073763', '#20124d', '#4c1130'
                         ].map(color => (
-                          <button
+                          <div
                             key={color}
-                            type="button"
-                            className="color-option"
+                            className="color-swatch"
                             style={{ backgroundColor: color }}
                             onClick={() => selectColor(color)}
                             title={`צבע ${color}`}
@@ -233,19 +279,6 @@ export default function ContentBlockEditDialog({
                       </div>
                     )}
                   </div>
-                  
-                  <div className="toolbar-separator"></div>
-                  
-                  <select
-                    onChange={(e) => document.execCommand('justifyLeft', false, null)}
-                    className="alignment-select"
-                    title="יישור טקסט"
-                  >
-                    <option value="justifyLeft">שמאל</option>
-                    <option value="justifyCenter">מרכז</option>
-                    <option value="justifyRight">ימין</option>
-                    <option value="justifyFull">יישור לשני הצדדים</option>
-                  </select>
                 </div>
                 
                 <div

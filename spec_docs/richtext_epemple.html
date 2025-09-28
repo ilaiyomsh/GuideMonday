@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Text Editor with JSON Export</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700&family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&family=Courier+Prime&family=Merriweather&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0073ea;
+            --primary-text-color: #323338;
+            --border-color: #d0d4e4;
+            --surface-color: #ffffff;
+            --neutral-background-color: #f5f6f8;
+            --font-family-base: 'Figtree', sans-serif;
+            --spacing-small: 8px;
+            --spacing-medium: 16px;
+            --border-radius-medium: 6px;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column; /* Changed for layout */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .editor-container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-medium);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: var(--spacing-medium);
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--spacing-small);
+            padding: var(--spacing-small);
+            background-color: var(--neutral-background-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .toolbar button, .save-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: var(--spacing-small);
+            border-radius: var(--border-radius-medium);
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        .toolbar button {
+             width: 36px;
+        }
+
+        .toolbar button:hover, .save-button:hover {
+            background-color: #e9eaf0;
+        }
+        
+        .toolbar button.active {
+            background-color: #dce0e6;
+        }
+
+        .toolbar button svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary-text-color);
+        }
+        
+        .toolbar select {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-medium);
+            padding: 0 var(--spacing-small);
+            font-family: var(--font-family-base);
+            color: var(--primary-text-color);
+            height: 36px;
+            cursor: pointer;
+        }
+        
+        .color-picker-container {
+            position: relative;
+        }
+        
+        .color-palette {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 40px;
+            left: 0;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-medium);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: var(--spacing-small);
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
+            width: 200px;
+            z-index: 10;
+        }
+
+        .color-swatch {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            transition: transform 0.1s, border-color 0.1s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            border-color: #333;
+        }
+
+
+        #editor {
+            min-height: 250px;
+            padding: var(--spacing-medium);
+            color: var(--primary-text-color);
+            line-height: 1.6;
+            outline: none;
+            font-size: 16px;
+        }
+        
+        .save-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0 var(--spacing-medium);
+            font-weight: 500;
+            margin-bottom: var(--spacing-medium);
+        }
+
+        .output-container {
+            width: 100%;
+            max-width: 700px;
+        }
+        .output-container h3 {
+            margin: 0 0 var(--spacing-small) 0;
+            color: var(--primary-text-color);
+        }
+        #json-output {
+            width: 100%;
+            min-height: 100px;
+            background: #2d2d2d;
+            color: #f1f1f1;
+            border-radius: var(--border-radius-medium);
+            padding: var(--spacing-medium);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier Prime', monospace;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+<div class="editor-container">
+    <div class="toolbar">
+        <button id="bold" title="הדגשה"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.6,10.79c.97-.67,1.65-1.77,1.65-2.79,0-2.26-1.75-4-4.25-4H7v14h7.04c2.1,0,3.71-1.7,3.71-3.78,0-1.52-.86-2.82-2.15-3.43M10,6.5h3c.83,0,1.5.67,1.5,1.5s-.67,1.5-1.5,1.5h-3V6.5m3.5,9H10v-3h3.5c.83,0,1.5.67,1.5,1.5s-.67,1.5-1.5,1.5Z"></path></svg></button>
+        <button id="italic" title="הטיה"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10,4v3h2.21l-3.42,8H6v3h8v-3h-2.21l3.42-8H18V4H10Z"></path></svg></button>
+        <button id="underline" title="קו תחתון"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,17c3.31,0,6-2.69,6-6V3h-2.5v8c0,1.93-1.57,3.5-3.5,3.5S8.5,12.93,8.5,11V3H6v8c0,3.31,2.69,6,6,6M5,19v2h14v-2H5Z"></path></svg></button>
+        <button id="insertUnorderedList" title="רשימת נקודות"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7,5h14v2H7V5M7,11h14v2H7V11M7,17h14v2H7V17M3,5h2v2H3V5M3,11h2v2H3V11M3,17h2v2H3V17Z"></path></svg></button>
+        <button id="insertOrderedList" title="רשימה ממוספרת"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7,5h14v2H7V5M7,11h14v2H7V11M7,17h14v2H7V17M3.5,5.5L2,4v3H5V5.5H3.5m0,4.5L2,8.5v3h3V10H3.5m.5,5.5H2v-1.5l1,.5L4,14v-3h1.5v4.5h-2Z"></path></svg></button>
+        <button id="justifyLeft" title="יישור לשמאל"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15,15H3v2h12V15m0-8H3v2h12V7M3,13h18v-2H3v2M3,21h18v-2H3v2M3,3V5h18V3H3Z"></path></svg></button>
+        <button id="justifyCenter" title="יישור למרכז"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7,15v2h10v-2H7m-4,6h18v-2H3v2m0-8h18v-2H3v2m4-6v2h10V7H7M3,3v2h18V3H3Z"></path></svg></button>
+        <button id="justifyRight" title="יישור לימין"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9,15v2h12v-2H9m-6,6h18v-2H3v2m6-8h12v-2H9v2m-6-6v2h18V7H3M3,3v2h18V3H3Z"></path></svg></button>
+        <select id="fontName" title="גופן">
+            <option value="Arial" style="font-family: Arial;">Arial</option>
+            <option value="Figtree, sans-serif" style="font-family: 'Figtree', sans-serif;" selected>Figtree</option>
+            <option value="Roboto, sans-serif" style="font-family: 'Roboto', sans-serif;">Roboto</option>
+            <option value="Open Sans, sans-serif" style="font-family: 'Open Sans', sans-serif;">Open Sans</option>
+            <option value="Merriweather, serif" style="font-family: 'Merriweather', serif;">Merriweather</option>
+            <option value="Courier Prime, monospace" style="font-family: 'Courier Prime', monospace;">Courier</option>
+            <option value="Times New Roman, serif" style="font-family: 'Times New Roman', serif;">Times New Roman</option>
+        </select>
+        <select id="fontSize" title="גודל גופן">
+            <option value="2">קטן</option>
+            <option value="3" selected>רגיל</option>
+            <option value="4">בינוני</option>
+            <option value="5">גדול</option>
+            <option value="6">גדול מאוד</option>
+        </select>
+        <div class="color-picker-container">
+             <button id="fontColorButton" title="צבע גופן">
+                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.62,12L12,5.67L14.37,12M11,3L5.5,17H7.5L8.62,14H15.37L16.5,17H18.5L13,3H11M21,19V22H3V19H21Z"></path></svg>
+             </button>
+             <div id="colorPalette" class="color-palette"></div>
+        </div>
+    </div>
+    <div id="editor" contenteditable="true">
+        <p>זהו אזור טקסט הניתן לעריכה. </p><p>נסה לסמן טקסט ולהשתמש בכפתורים בסרגל הכלים למעלה כדי לעצב אותו.</p><ul><li>אפשר גם ליצור רשימות.</li><li>עם תבליטים או מספרים.</li></ul><p>כעת ניתן גם לשנות <font color="#d13131">צבע</font>, <font size="5">גודל</font> ו<font face="Roboto, sans-serif">גופן</font> של הטקסט.</p><p style="text-align: center;">אפשר גם ליישר את הטקסט למרכז.</p>
+    </div>
+</div>
+
+<button id="saveButton" class="save-button">שמור תוכן והצג JSON</button>
+
+<div class="output-container">
+    <h3>פלט JSON שיישמר במסד הנתונים:</h3>
+    <pre id="json-output"></pre>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const editor = document.getElementById('editor');
+        const toolbar = document.querySelector('.toolbar');
+        const saveButton = document.getElementById('saveButton');
+        const jsonOutput = document.getElementById('json-output');
+        const fontColorButton = document.getElementById('fontColorButton');
+        const colorPalette = document.getElementById('colorPalette');
+        
+        let savedRange = null;
+
+        const colors = [
+            '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
+            '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
+            '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
+            '#dd7e6b', '#ea9999', '#f9cb9c', '#ffe599', '#b6d7a8', '#a2c4c9', '#a4c2f4', '#9fc5e8', '#b4a7d6', '#d5a6bd',
+            '#d0442f', '#e06666', '#f6b26b', '#ffd966', '#93c47d', '#76a5af', '#6d9eeb', '#6fa8dc', '#8e7cc3', '#c27ba0',
+            '#a61c00', '#cc0000', '#e69138', '#f1c232', '#6aa84f', '#45818e', '#3c78d8', '#3d85c6', '#674ea7', '#a64d79',
+            '#85200c', '#990000', '#b45f06', '#bf9000', '#38761d', '#134f5c', '#0b5394', '#351c75', '#741b47',
+            '#5b0f00', '#660000', '#783f04', '#7f6000', '#274e13', '#0c343d', '#073763', '#20124d', '#4c1130'
+        ];
+
+        colors.forEach(color => {
+            const swatch = document.createElement('div');
+            swatch.className = 'color-swatch';
+            swatch.style.backgroundColor = color;
+            swatch.dataset.color = color;
+            colorPalette.appendChild(swatch);
+        });
+
+        const saveSelection = () => {
+            if (window.getSelection) {
+                const sel = window.getSelection();
+                if (sel.getRangeAt && sel.rangeCount) {
+                    savedRange = sel.getRangeAt(0);
+                }
+            }
+        };
+
+        const restoreSelection = () => {
+            if (savedRange) {
+                if (window.getSelection) {
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(savedRange);
+                }
+            }
+        };
+
+        toolbar.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button || !button.id) return;
+
+            if(button.id === 'fontColorButton'){
+                saveSelection();
+                colorPalette.style.display = colorPalette.style.display === 'grid' ? 'none' : 'grid';
+            } else {
+                document.execCommand(button.id, false, null);
+                editor.focus();
+                updateToolbar();
+            }
+        });
+
+        colorPalette.addEventListener('click', (e) => {
+            if (e.target.classList.contains('color-swatch')) {
+                const color = e.target.dataset.color;
+                restoreSelection();
+                document.execCommand('foreColor', false, color);
+                colorPalette.style.display = 'none';
+                savedRange = null; 
+                editor.focus();
+            }
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!colorPalette.contains(e.target) && !fontColorButton.contains(e.target)) {
+                 colorPalette.style.display = 'none';
+                 savedRange = null;
+            }
+        });
+
+        toolbar.addEventListener('change', (e) => {
+            const target = e.target;
+            const command = target.id;
+            if (command === 'fontSize' || command === 'fontName') {
+                document.execCommand(command, false, target.value);
+                editor.focus();
+            }
+        });
+        
+        saveButton.addEventListener('click', () => {
+            const htmlContent = editor.innerHTML;
+            const contentBlock = {
+                id: `block-${new Date().getTime()}`,
+                type: 'text',
+                content: htmlContent 
+            };
+            const jsonString = JSON.stringify(contentBlock, null, 2);
+            jsonOutput.textContent = jsonString;
+        });
+
+        const updateToolbar = () => {
+            const buttons = toolbar.querySelectorAll('button[id]');
+            buttons.forEach(button => {
+                try {
+                    if (document.queryCommandState(button.id)) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                } catch (e) { /* Some commands may not support queryCommandState */ }
+            });
+        };
+
+        editor.addEventListener('keyup', updateToolbar);
+        editor.addEventListener('mouseup', updateToolbar);
+        editor.addEventListener('focus', updateToolbar);
+        
+        saveButton.click();
+    });
+</script>
+
+</body>
+</html>
+
