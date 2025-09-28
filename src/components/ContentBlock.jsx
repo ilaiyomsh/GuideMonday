@@ -5,7 +5,7 @@ import ContentBlockEditDialog from './ContentBlockEditDialog';
 import DOMPurify from 'dompurify';
 
 export default function ContentBlock({ block, isEditMode, chapterId, sectionId, blockIndex, totalBlocks }) {
-  const { handleDeleteContentBlock, handleReorderContentBlock } = useGuide();
+  const { handleDeleteContentBlock, handleReorderContentBlock, direction } = useGuide();
   const [isHovered, setIsHovered] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -100,6 +100,7 @@ export default function ContentBlock({ block, isEditMode, chapterId, sectionId, 
         return (
           <div 
             className="text-content rich-text-content"
+            dir={direction}
             dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
           />
         );

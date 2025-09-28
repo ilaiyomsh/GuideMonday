@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGuide } from '../context/GuideContext';
+import DraftTextEditor from './DraftTextEditor';
 
 export default function ContentBlockEditDialog({ 
   isOpen, 
@@ -9,7 +10,7 @@ export default function ContentBlockEditDialog({
   sectionId, 
   blockIndex 
 }) {
-  const { handleUpdateContentBlock } = useGuide();
+  const { handleUpdateContentBlock, direction } = useGuide();
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
   const [showColorPalette, setShowColorPalette] = useState(false);
@@ -17,10 +18,19 @@ export default function ContentBlockEditDialog({
 
   useEffect(() => {
     if (block) {
-      setFormData(block.data || {});
+      // Handle both old format (text) and new format (content)
+      const blockData = block.data || {};
+      const formDataToSet = {
+        ...blockData,
+        // Ensure we have content field for text blocks
+        content: blockData.content || blockData.text || ''
+      };
+      setFormData(formDataToSet);
       setErrors({});
     }
   }, [block]);
+
+  // Draft.js handles content updates automatically
 
   // Close color palette when clicking outside
   useEffect(() => {
@@ -88,18 +98,29 @@ export default function ContentBlockEditDialog({
   };
 
   const handleSave = () => {
-    // Capture final HTML content from the rich text editor
-    const editor = document.getElementById('rich-text-editor');
-    if (editor) {
-      const finalContent = editor.innerHTML;
-      const updatedData = { ...formData, content: finalContent };
-      handleUpdateContentBlock(chapterId, sectionId, block.id, updatedData);
+    if (block?.type === 'text') {
+      // For text blocks, use formData.content which is updated by DraftTextEditor
+      if (validateForm()) {
+        handleUpdateContentBlock(chapterId, sectionId, block.id, formData);
+        onClose();
+      }
+    } else {
+      // For other block types (image, video, gif, link), use formData directly
+      if (validateForm()) {
+        handleUpdateContentBlock(chapterId, sectionId, block.id, formData);
       onClose();
+      }
     }
   };
 
   const handleCancel = () => {
-    setFormData(block?.data || {});
+    // Reset to original block data
+    const blockData = block?.data || {};
+    const formDataToSet = {
+      ...blockData,
+      content: blockData.content || blockData.text || ''
+    };
+    setFormData(formDataToSet);
     setErrors({});
     onClose();
   };
@@ -137,12 +158,7 @@ export default function ContentBlockEditDialog({
     setShowColorPalette(false);
   };
 
-  const handleEditorInput = () => {
-    const editor = document.getElementById('rich-text-editor');
-    if (editor) {
-      setFormData(prev => ({ ...prev, content: editor.innerHTML }));
-    }
-  };
+  // Draft.js handles input and Enter key automatically
 
   const renderFormFields = () => {
     switch (block.type) {
@@ -151,155 +167,13 @@ export default function ContentBlockEditDialog({
           <>
             <div className="form-field">
               <label htmlFor="text">טקסט *</label>
-              <div className="rich-text-editor-container">
-                <div className="rich-text-toolbar">
-                  <button
-                    type="button"
-                    className="toolbar-button"
-                    onClick={() => document.execCommand('bold', false, null)}
-                    title="הדגשה"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M15.6,10.79c.97-.67,1.65-1.77,1.65-2.79,0-2.26-1.75-4-4.25-4H7v14h7.04c2.1,0,3.71-1.7,3.71-3.78,0-1.52-.86-2.82-2.15-3.43M10,6.5h3c.83,0,1.5.67,1.5,1.5s-.67,1.5-1.5,1.5h-3V6.5m3.5,9H10v-3h3.5c.83,0,1.5.67,1.5,1.5s-.67,1.5-1.5,1.5Z"></path>
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className="toolbar-button"
-                    onClick={() => document.execCommand('italic', false, null)}
-                    title="הטיה"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M10,4v3h2.21l-3.42,8H6v3h8v-3h-2.21l3.42-8H18V4H10Z"></path>
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className="toolbar-button"
-                    onClick={() => document.execCommand('underline', false, null)}
-                    title="קו תחתון"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12,17c3.31,0,6-2.69,6-6V3h-2.5v8c0,1.93-1.57,3.5-3.5,3.5S8.5,12.93,8.5,11V3H6v8c0,3.31,2.69,6,6,6M5,19v2h14v-2H5Z"></path>
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className="toolbar-button"
-                    onClick={() => document.execCommand('insertUnorderedList', false, null)}
-                    title="רשימת נקודות"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M7,5h14v2H7V5M7,11h14v2H7V11M7,17h14v2H7V17M3,5h2v2H3V5M3,11h2v2H3V11M3,17h2v2H3V17Z"></path>
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className="toolbar-button"
-                    onClick={() => document.execCommand('insertOrderedList', false, null)}
-                    title="רשימה ממוספרת"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M7,5h14v2H7V5M7,11h14v2H7V11M7,17h14v2H7V17M3.5,5.5L2,4v3H5V5.5H3.5m0,4.5L2,8.5v3h3V10H3.5m.5,5.5H2v-1.5l1,.5L4,14v-3h1.5v4.5h-2Z"></path>
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className="toolbar-button"
-                    onClick={() => document.execCommand('justifyLeft', false, null)}
-                    title="יישור לשמאל"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M15,15H3v2h12V15m0-8H3v2h12V7M3,13h18v-2H3v2M3,21h18v-2H3v2M3,3V5h18V3H3Z"></path>
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className="toolbar-button"
-                    onClick={() => document.execCommand('justifyCenter', false, null)}
-                    title="יישור למרכז"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M7,15v2h10v-2H7m-4,6h18v-2H3v2m0-8h18v-2H3v2m4-6v2h10V7H7M3,3v2h18V3H3Z"></path>
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className="toolbar-button"
-                    onClick={() => document.execCommand('justifyRight', false, null)}
-                    title="יישור לימין"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M9,15v2h12v-2H9m-6,6h18v-2H3v2m6-8h12v-2H9v2m-6-6v2h18V7H3M3,3v2h18V3H3Z"></path>
-                    </svg>
-                  </button>
-                  <select
-                    onChange={(e) => document.execCommand('fontName', false, e.target.value)}
-                    className="font-select"
-                    title="גופן"
-                  >
-                    <option value="Arial">Arial</option>
-                    <option value="Figtree, sans-serif" selected>Figtree</option>
-                    <option value="Roboto, sans-serif">Roboto</option>
-                    <option value="Open Sans, sans-serif">Open Sans</option>
-                    <option value="Merriweather, serif">Merriweather</option>
-                    <option value="Courier Prime, monospace">Courier</option>
-                    <option value="Times New Roman, serif">Times New Roman</option>
-                  </select>
-                  <select
-                    onChange={(e) => document.execCommand('fontSize', false, e.target.value)}
-                    className="font-size-select"
-                    title="גודל גופן"
-                  >
-                    <option value="2">קטן</option>
-                    <option value="3" selected>רגיל</option>
-                    <option value="4">בינוני</option>
-                    <option value="5">גדול</option>
-                    <option value="6">גדול מאוד</option>
-                  </select>
-                  <div className="color-picker-container">
-                    <button
-                      type="button"
-                      className="toolbar-button"
-                      onClick={toggleColorPalette}
-                      title="צבע גופן"
-                    >
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9.62,12L12,5.67L14.37,12M11,3L5.5,17H7.5L8.62,14H15.37L16.5,17H18.5L13,3H11M21,19V22H3V19H21Z"></path>
-                      </svg>
-                    </button>
-                    <div className={`color-palette ${showColorPalette ? 'show' : ''}`}>
-                      {[
-                        '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
-                        '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
-                        '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
-                        '#dd7e6b', '#ea9999', '#f9cb9c', '#ffe599', '#b6d7a8', '#a2c4c9', '#a4c2f4', '#9fc5e8', '#b4a7d6', '#d5a6bd',
-                        '#d0442f', '#e06666', '#f6b26b', '#ffd966', '#93c47d', '#76a5af', '#6d9eeb', '#6fa8dc', '#8e7cc3', '#c27ba0',
-                        '#a61c00', '#cc0000', '#e69138', '#f1c232', '#6aa84f', '#45818e', '#3c78d8', '#3d85c6', '#674ea7', '#a64d79',
-                        '#85200c', '#990000', '#b45f06', '#bf9000', '#38761d', '#134f5c', '#0b5394', '#351c75', '#741b47',
-                        '#5b0f00', '#660000', '#783f04', '#7f6000', '#274e13', '#0c343d', '#073763', '#20124d', '#4c1130'
-                      ].map(color => (
-                        <div
-                          key={color}
-                          className="color-swatch"
-                          style={{ backgroundColor: color }}
-                          onClick={() => selectColor(color)}
-                          title={`צבע ${color}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                
-                <div
-                  id="rich-text-editor"
-                  className="rich-text-editor"
-                  contentEditable={true}
-                  suppressContentEditableWarning={true}
-                  onInput={handleEditorInput}
-                  dangerouslySetInnerHTML={{ __html: formData.content || '' }}
-                />
-              </div>
+              <DraftTextEditor
+                initialContent={formData.content || ''}
+                onChange={(htmlContent) => {
+                  setFormData(prev => ({ ...prev, content: htmlContent }));
+                }}
+                direction={direction}
+              />
               {errors.text && <span className="error-message">{errors.text}</span>}
             </div>
           </>

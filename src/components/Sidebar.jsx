@@ -3,8 +3,19 @@ import { useGuide } from '../context/GuideContext';
 import { Edit, MoveArrowUp, MoveArrowDown, Delete } from '@vibe/icons';
 
 export default function Sidebar({ currentPage, currentChapterId, onNavigate }) {
-  const { guideData, isEditMode, handleAddChapter, handleReorderChapter, handleDeleteChapter, handleReorderSection, handleDeleteSection } = useGuide();
+  const { guideData, isEditMode, setIsEditMode, isOwner, handleAddChapter, handleReorderChapter, handleDeleteChapter, handleReorderSection, handleDeleteSection, handleSave } = useGuide();
+  
+  // Log isOwner status to console
+  console.log("🔍 Sidebar - isOwner status:", isOwner);
   const [expandedChapters, setExpandedChapters] = useState(new Set());
+
+  const handleEditModeToggle = () => {
+    setIsEditMode(!isEditMode);
+  };
+
+  const handleSaveClick = async () => {
+    await handleSave();
+  };
 
   const toggleChapterExpansion = (chapterId) => {
     const newExpanded = new Set(expandedChapters);
@@ -39,6 +50,24 @@ export default function Sidebar({ currentPage, currentChapterId, onNavigate }) {
     <>
       <div className="sidebar-header">
         <h1>{guideData.title || 'מדריך מקיף לפיתוח Web'}</h1>
+        {isOwner && (
+          <div className="edit-toggle-container">
+            <span>מצב עריכה</span>
+            <label className="toggle-switch">
+              <input 
+                type="checkbox" 
+                checked={isEditMode} 
+                onChange={handleEditModeToggle}
+              />
+              <span className="slider"></span>
+            </label>
+            {isEditMode && (
+              <button className="save-button" onClick={handleSaveClick}>
+                שמור
+              </button>
+            )}
+          </div>
+        )}
       </div>
       <nav>
         <ul>

@@ -4,7 +4,7 @@ import ContentBlock from './ContentBlock';
 import { Edit, MoveArrowUp, MoveArrowDown, Delete } from '@vibe/icons';
 
 export default function ChapterPage({ chapter, onNavigate }) {
-  const { isEditMode, setIsEditMode, handleAddSection, handleAddContentBlock, handleSave, handleUpdateChapter, handleUpdateSection, handleReorderSection, handleDeleteSection } = useGuide();
+  const { isEditMode, handleAddSection, handleAddContentBlock, handleUpdateChapter, handleUpdateSection, handleReorderSection, handleDeleteSection } = useGuide();
   const [expandedSections, setExpandedSections] = useState(new Set());
   const [editingChapter, setEditingChapter] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
@@ -26,13 +26,6 @@ export default function ChapterPage({ chapter, onNavigate }) {
     setExpandedSections(newExpanded);
   };
 
-  const handleEditModeToggle = () => {
-    setIsEditMode(!isEditMode);
-  };
-
-  const handleSaveClick = async () => {
-    await handleSave();
-  };
 
   const handleEditChapter = () => {
     setEditingChapter(true);
@@ -112,22 +105,6 @@ export default function ChapterPage({ chapter, onNavigate }) {
               {isEditMode && (
                 <button className="edit-content-button" onClick={handleEditChapter} title="ערוך">
                   <Edit />
-                </button>
-              )}
-            </div>
-            <div className="edit-toggle-container">
-              <span>מצב עריכה</span>
-              <label className="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  checked={isEditMode} 
-                  onChange={handleEditModeToggle}
-                />
-                <span className="slider"></span>
-              </label>
-              {isEditMode && (
-                <button className="save-button" onClick={handleSaveClick}>
-                  שמור
                 </button>
               )}
             </div>

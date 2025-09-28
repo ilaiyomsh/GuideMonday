@@ -24,8 +24,12 @@ export const useGuide = () => {
  */
 export const GuideProvider = ({ children }) => {
     const guideManagerValues = useGuideManager();
+    const contextValue = {
+        ...guideManagerValues,
+        direction: 'rtl' // Hebrew direction
+    };
     return (
-        <GuideContext.Provider value={guideManagerValues}>
+        <GuideContext.Provider value={contextValue}>
             {children}
         </GuideContext.Provider>
     );

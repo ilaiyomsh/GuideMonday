@@ -3,7 +3,7 @@ import { useGuide } from '../context/GuideContext';
 import { Edit } from '@vibe/icons';
 
 export default function HomePage({ onNavigate }) {
-  const { guideData, isEditMode, setIsEditMode, handleSave, handleUpdateHomePage } = useGuide();
+  const { guideData, isEditMode, handleUpdateHomePage } = useGuide();
   const [isEditingHomePage, setIsEditingHomePage] = useState(false);
   const [homePageData, setHomePageData] = useState({
     title: guideData?.homePage?.title || 'ברוכים הבאים',
@@ -16,13 +16,6 @@ export default function HomePage({ onNavigate }) {
     onNavigate('chapter-page', chapterId);
   };
 
-  const handleEditModeToggle = () => {
-    setIsEditMode(!isEditMode);
-  };
-
-  const handleSaveClick = async () => {
-    await handleSave();
-  };
 
   const handleEditHomePage = () => {
     setIsEditingHomePage(true);
@@ -83,22 +76,6 @@ export default function HomePage({ onNavigate }) {
               {isEditMode && (
                 <button className="edit-content-button" onClick={handleEditHomePage} title="ערוך">
                   <Edit />
-                </button>
-              )}
-            </div>
-            <div className="edit-toggle-container">
-              <span>מצב עריכה</span>
-              <label className="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  checked={isEditMode} 
-                  onChange={handleEditModeToggle}
-                />
-                <span className="slider"></span>
-              </label>
-              {isEditMode && (
-                <button className="save-button" onClick={handleSaveClick}>
-                  שמור
                 </button>
               )}
             </div>

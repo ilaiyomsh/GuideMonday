@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useMondayApi } from './useMondayApi'; // Ensure you have created this file as demonstrated
+import mondaySdk from 'monday-sdk-js';
+
+const monday = mondaySdk();
+monday.setApiVersion("2023-10");
 
 // Helper function to generate unique IDs
 const generateId = (prefix = 'item') => {
@@ -19,6 +23,40 @@ export const useGuideManager = () => {
   const [originalData, setOriginalData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  
+  // Function to check if current user is owner of the board
+  const checkOwnerStatus = useCallback(async () => {
+    try {
+      const context = await monday.get('context');
+      const boardId = context.data.boardId;
+      const userId = context.data.user.id;
+      
+      if (!boardId || !userId) {
+        setIsOwner(false);
+        return;
+      }
+      
+      const query = `
+        query {
+          boards(ids: [${boardId}]) {
+            owners {
+              id
+            }
+          }
+        }
+      `;
+      
+      const response = await monday.api(query);
+      const owners = response.data.boards[0].owners;
+      const isUserOwner = owners.some(owner => owner.id === userId);
+      
+      setIsOwner(isUserOwner);
+      
+    } catch (error) {
+      setIsOwner(false);
+    }
+  }, []);
   
   // Load the initial data when the application mounts
   useEffect(() => {
@@ -28,9 +66,12 @@ export const useGuideManager = () => {
       setGuideData(data);
       setOriginalData(JSON.parse(JSON.stringify(data))); // Deep copy for comparison
       setIsLoading(false);
+      
+      // Check owner status after loading data
+      await checkOwnerStatus();
     };
     loadInitialData();
-  }, [fetchGuide]);
+  }, [fetchGuide, checkOwnerStatus]);
 
   // Calculate if there are unsaved changes
   const hasChanges = useMemo(() => {
@@ -265,6 +306,7 @@ export const useGuideManager = () => {
     isLoading,
     isEditMode,
     setIsEditMode,
+    isOwner,
     hasChanges,
     handleSave,
     handleUpdateHomePage,
