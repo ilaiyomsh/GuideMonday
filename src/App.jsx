@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
 import { useGuide } from './context/GuideContext.jsx';
 
 import Sidebar from './components/Sidebar';

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useGuide } from '../context/GuideContext';
 import DraftTextEditor from './DraftTextEditor';
 import mondaySdk from 'monday-sdk-js';
+import { getBlockTypeName } from '../constants/blockTypes';
+import { MONDAY_CONFIG, FILE_UPLOAD } from '../constants/config';
 
 export default function ContentBlockEditDialog({ 
   isOpen, 
@@ -94,9 +96,9 @@ export default function ContentBlockEditDialog({
       return;
     }
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setErrors(prev => ({ ...prev, file: 'גודל הקובץ חייב להיות קטן מ-10MB' }));
+    // Validate file size
+    if (file.size > FILE_UPLOAD.MAX_SIZE_BYTES) {
+      setErrors(prev => ({ ...prev, file: `גודל הקובץ חייב להיות קטן מ-${FILE_UPLOAD.MAX_SIZE_MB}MB` }));
       return;
     }
 
@@ -105,10 +107,7 @@ export default function ContentBlockEditDialog({
 
     try {
       // Upload file to Monday.com using the provided logic
-      const result = await uploadFileWithSdk(file, '9265392875', 'file_mkw7h32e');
-      
-      console.log('Upload successful:', result);
-      console.log('File URL:', result.url);
+      const result = await uploadFileWithSdk(file, MONDAY_CONFIG.BOARD_ID, MONDAY_CONFIG.FILE_COLUMN_ID);
       
       // Update form data with the uploaded URL
       setFormData(prev => ({ ...prev, url: result.url }));
@@ -753,14 +752,3 @@ export default function ContentBlockEditDialog({
   );
 }
 
-function getBlockTypeName(type) {
-  const typeNames = {
-    text: 'טקסט',
-    image: 'תמונה',
-    video: 'וידאו',
-    gif: 'GIF',
-    link: 'קישור',
-    form: 'טופס'
-  };
-  return typeNames[type] || type;
-}

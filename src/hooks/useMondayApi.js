@@ -8,7 +8,6 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 export const useMondayApi = () => {
 
     const fetchGuide = useCallback(async () => {
-        console.log("=== Fetching data from Monday Storage ===");
         try {
             const res = await monday.storage.instance.getItem('guideData');
             const storedString = res?.data?.value;
@@ -16,7 +15,6 @@ export const useMondayApi = () => {
                 return JSON.parse(storedString);
             }
             // If no data, return null to show setup screen
-            console.log("No data found, returning null to show setup screen.");
             return null;
         } catch (error) {
             console.error("Failed to fetch guide data:", error);
@@ -28,7 +26,6 @@ export const useMondayApi = () => {
     const saveGuide = useCallback(async (guideToSave) => {
         if (!guideToSave) return false;
         
-        console.log("=== Robust Save Process Started ===");
         const jsonString = JSON.stringify(guideToSave);
         const MAX_RETRIES = 3;
         const RETRY_DELAY_MS = 500;
@@ -39,7 +36,6 @@ export const useMondayApi = () => {
                 await sleep(RETRY_DELAY_MS);
                 const verifyRes = await monday.storage.instance.getItem('guideData');
                 if (verifyRes.data.value) {
-                    console.log(`Save attempt ${attempt}: Success!`);
                     monday.execute('notice', { message: 'המדריך נשמר בהצלחה', type: 'success' });
                     return true;
                 }

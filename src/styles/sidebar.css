@@ -1,0 +1,186 @@
+/* Sidebar and Navigation Styles */
+.sidebar {
+  width: 280px;
+  background-color: var(--neutral-background-color);
+  padding: var(--spacing-medium);
+  color: var(--primary-text-color);
+  overflow-y: auto;
+  border-left: 1px solid var(--border-color);
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  margin-bottom: var(--spacing-large);
+  padding: var(--spacing-small) var(--spacing-medium);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-medium);
+}
+
+.sidebar-header h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--primary-text-color);
+}
+
+.sidebar-header .edit-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-small);
+  padding: var(--spacing-small);
+  background-color: var(--neutral-background-color);
+  border-radius: var(--border-radius-medium);
+  border: 1px solid var(--border-color);
+}
+
+.sidebar-header .edit-toggle-container span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--secondary-text-color);
+}
+
+.sidebar-header .edit-toggle-container .save-button {
+  padding: var(--spacing-xs) var(--spacing-small);
+  font-size: 0.8rem;
+  min-height: 24px;
+  height: 24px;
+  line-height: 1;
+}
+
+.sidebar nav {
+  flex-grow: 1;
+}
+
+.sidebar nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar nav ul li {
+  margin-bottom: var(--spacing-small);
+}
+
+.sidebar .nav-link {
+  display: block;
+  padding: 10px var(--spacing-medium);
+  font-weight: 500;
+  color: var(--primary-text-color);
+  text-decoration: none;
+  border-radius: var(--border-radius-medium);
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.sidebar .nav-link:hover {
+  background-color: rgba(0, 115, 234, 0.1);
+}
+
+.sidebar .nav-link.active {
+  background-color: rgba(0, 115, 234, 0.1);
+  color: var(--primary-color);
+}
+
+/* Chapter Navigation */
+.chapter-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: var(--border-radius-medium);
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.chapter-item:hover {
+  background-color: rgba(0, 115, 234, 0.05);
+}
+
+.chapter-title-link {
+  flex-grow: 1;
+  padding: 10px var(--spacing-medium);
+  padding-left: 0;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--primary-text-color);
+}
+
+.chapter-controls {
+  display: none;
+  position: absolute;
+  top: -16px;
+  right: 8px;
+  background-color: white;
+  border-radius: var(--border-radius-medium);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 10;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+}
+
+.chapter-action-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-small);
+  transition: background-color 0.2s;
+  width: 20px;
+  height: 20px;
+}
+
+.chapter-action-button:hover {
+  background-color: var(--neutral-background-color);
+}
+
+.chapter-action-button svg {
+  width: 12px;
+  height: 12px;
+  color: var(--secondary-text-color);
+}
+
+.chapter-action-button.delete:hover svg {
+  color: var(--danger-color);
+}
+
+.chapter-action-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.chapter-accordion-toggle {
+  padding: 10px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+}
+
+.chapter-accordion-toggle svg {
+  transition: transform 0.3s ease;
+}
+
+.chapter-accordion-toggle.active svg {
+  transform: rotate(90deg);
+}
+
+.sidebar .accordion-content {
+  list-style-type: none;
+  padding-right: var(--spacing-medium);
+  margin-top: var(--spacing-small);
+  border-right: 1px solid var(--border-color);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.sidebar .accordion-content.open {
+  max-height: 500px;
+}

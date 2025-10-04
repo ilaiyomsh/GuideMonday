@@ -1,0 +1,134 @@
+/* Text Editor Styles - Draft.js */
+.draft-text-editor {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-medium);
+  overflow: hidden;
+  direction: rtl;
+}
+
+.draft-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.toolbar-button {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-button:hover {
+  background-color: #f0f0f0;
+  border-color: #999;
+}
+
+.toolbar-button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 24px;
+  background-color: #ddd;
+  margin: 0 4px;
+}
+
+.toolbar-button svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.toolbar-button.active svg {
+  fill: white;
+}
+
+.draft-editor-container {
+  min-height: 200px;
+  padding: 12px;
+  background: white;
+}
+
+.draft-editor-container .DraftEditor-root {
+  min-height: 180px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--primary-text-color);
+}
+
+.draft-editor-container .DraftEditor-editorContainer {
+  min-height: 180px;
+}
+
+.draft-editor-container .public-DraftEditor-content {
+  min-height: 180px;
+  padding: 0;
+}
+
+/* RTL Support */
+.draft-text-editor[dir="rtl"] .DraftEditor-root {
+  direction: rtl;
+  text-align: right;
+}
+
+.draft-text-editor[dir="rtl"] .public-DraftEditor-content {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Draft.js block styles */
+.draft-editor-container h1,
+.draft-editor-container h2,
+.draft-editor-container h3 {
+  margin: 16px 0 8px 0;
+  font-weight: bold;
+}
+
+.draft-editor-container h1 {
+  font-size: 24px;
+}
+
+.draft-editor-container h2 {
+  font-size: 20px;
+}
+
+.draft-editor-container h3 {
+  font-size: 18px;
+}
+
+.draft-editor-container ul,
+.draft-editor-container ol {
+  margin: 8px 0;
+  padding-right: 20px;
+  list-style: none;
+}
+
+.draft-editor-container li {
+  margin: 4px 0;
+  position: relative;
+  padding-right: 0;
+}
+
+.draft-editor-container blockquote {
+  margin: 16px 0;
+  padding: 8px 16px;
+  border-right: 4px solid #ddd;
+  background-color: #f8f9fa;
+  font-style: italic;
+}

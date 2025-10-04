@@ -1,0 +1,257 @@
+/* Responsive Design - Media Queries */
+
+/* Medium Screens - Tablets */
+@media (max-width: 768px) {
+  .block-image {
+    margin: var(--spacing-small) 0;
+  }
+  
+  .block-image img.tall-image {
+    max-width: 95%;
+    max-height: 70vh;
+  }
+  
+  .block-image img.wide-image {
+    max-height: 50vh;
+  }
+  
+  .block-image figcaption {
+    font-size: 0.8rem;
+    padding: 0 var(--spacing-small);
+  }
+
+  .block-gif {
+    margin: var(--spacing-small) 0;
+  }
+  
+  .gif-embed img.tall-gif,
+  .gif-preview.tall-gif {
+    max-width: 95%;
+    max-height: 70vh;
+  }
+  
+  .gif-embed img.wide-gif,
+  .gif-preview.wide-gif {
+    max-height: 50vh;
+  }
+  
+  .gif-caption {
+    font-size: 0.8rem;
+    padding: 0 var(--spacing-small);
+  }
+
+  .block-video {
+    margin: var(--spacing-small) 0;
+  }
+  
+  .video-preview.tall-video {
+    max-width: 95%;
+    max-height: 70vh;
+  }
+  
+  .video-preview.wide-video {
+    max-height: 50vh;
+  }
+
+  .block-placeholder {
+    padding: var(--spacing-large);
+    min-height: 80px;
+  }
+  
+  .placeholder-icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-small);
+  }
+  
+  .placeholder-title {
+    font-size: 1rem;
+  }
+  
+  .placeholder-description {
+    font-size: 0.85rem;
+    max-width: 200px;
+  }
+
+  .block-form .form-embed {
+    min-width: 500px;
+    min-height: 450px;
+  }
+  
+  .block-form .form-embed iframe {
+    min-width: 500px;
+    min-height: 450px;
+  }
+
+  .guide-setup {
+    padding: var(--spacing-medium);
+  }
+  
+  .setup-header h1 {
+    font-size: 2rem;
+  }
+  
+  .setup-content {
+    padding: var(--spacing-large);
+  }
+  
+  .options-section {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-medium);
+  }
+  
+  .option-card {
+    padding: var(--spacing-medium);
+  }
+}
+
+/* Small Screens - Mobile */
+@media (max-width: 600px) {
+  .block-form .form-embed {
+    min-width: 100%;
+    min-height: 400px;
+  }
+  
+  .block-form .form-embed iframe {
+    min-width: 100%;
+    min-height: 400px;
+  }
+}
+
+/* Very Small Screens - Mobile Portrait */
+@media (max-width: 480px) {
+  .block-image img {
+    border-radius: var(--border-radius-small);
+  }
+  
+  .block-image img.tall-image {
+    max-width: 100%;
+    max-height: 60vh;
+  }
+  
+  .block-image img.wide-image {
+    max-height: 40vh;
+  }
+
+  .gif-embed img,
+  .gif-preview {
+    border-radius: var(--border-radius-small);
+  }
+  
+  .gif-embed img.tall-gif,
+  .gif-preview.tall-gif {
+    max-width: 100%;
+    max-height: 60vh;
+  }
+  
+  .gif-embed img.wide-gif,
+  .gif-preview.wide-gif {
+    max-height: 40vh;
+  }
+
+  .video-preview {
+    border-radius: var(--border-radius-small);
+  }
+  
+  .video-preview.tall-video {
+    max-width: 100%;
+    max-height: 60vh;
+  }
+  
+  .video-preview.wide-video {
+    max-height: 40vh;
+  }
+
+  .block-placeholder {
+    padding: var(--spacing-medium);
+    min-height: 70px;
+  }
+  
+  .placeholder-icon {
+    font-size: 1.8rem;
+  }
+  
+  .placeholder-title {
+    font-size: 0.95rem;
+  }
+  
+  .placeholder-description {
+    font-size: 0.8rem;
+    max-width: 180px;
+  }
+  
+  .upload-button {
+    padding: var(--spacing-small);
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+
+  .block-form .form-embed {
+    min-width: 100%;
+    min-height: 350px;
+  }
+  
+  .block-form .form-embed iframe {
+    min-width: 100%;
+    min-height: 350px;
+  }
+
+  .setup-header {
+    padding: var(--spacing-large);
+  }
+  
+  .setup-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .setup-content {
+    padding: var(--spacing-medium);
+  }
+  
+  .option-icon {
+    font-size: 2.5rem;
+  }
+}
+
+/* Large Screens - Desktop */
+@media (min-width: 1400px) {
+  .main-content {
+    max-width: 2400px;
+    padding: var(--spacing-xlarge) 120px;
+  }
+  
+  .modal-content {
+    max-width: 1400px;
+  }
+  
+  .block-form .form-embed {
+    min-width: 800px;
+    min-height: 600px;
+  }
+  
+  .block-form .form-embed iframe {
+    min-width: 800px;
+    min-height: 600px;
+  }
+}
+
+/* Very Large Screens */
+@media (min-width: 1800px) {
+  .main-content {
+    max-width: 2800px;
+    padding: var(--spacing-xlarge) 160px;
+  }
+  
+  .modal-content {
+    max-width: 1600px;
+  }
+  
+  .block-form .form-embed {
+    min-width: 900px;
+    min-height: 700px;
+  }
+  
+  .block-form .form-embed iframe {
+    min-width: 900px;
+    min-height: 700px;
+  }
+}

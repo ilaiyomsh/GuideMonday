@@ -3,6 +3,7 @@ import { useGuide } from '../context/GuideContext';
 import { MoveArrowUp, MoveArrowDown, Delete, Edit } from '@vibe/icons';
 import ContentBlockEditDialog from './ContentBlockEditDialog';
 import DOMPurify from 'dompurify';
+import { getBlockTypeName, getBlockTypeIcon, getBlockTypePlaceholder } from '../constants/blockTypes';
 
 export default function ContentBlock({ block, isEditMode, chapterId, sectionId, blockIndex, totalBlocks }) {
   const { handleDeleteContentBlock, handleReorderContentBlock, direction } = useGuide();
@@ -175,64 +176,17 @@ export default function ContentBlock({ block, isEditMode, chapterId, sectionId, 
   };
 
   const getPlaceholderText = () => {
-    switch (block.type) {
-      case 'text':
-        return (
-          <div className="block-placeholder">
-            <div className="placeholder-icon">📝</div>
-            <p className="placeholder-title">בלוק טקסט</p>
-            <p className="placeholder-description">לחץ על כפתור העריכה כדי להוסיף טקסט</p>
-          </div>
-        );
-      case 'image':
-        return (
-          <div className="block-placeholder">
-            <div className="placeholder-icon">🖼️</div>
-            <p className="placeholder-title">בלוק תמונה</p>
-            <p className="placeholder-description">לחץ על כפתור העריכה כדי להוסיף תמונה</p>
-          </div>
-        );
-      case 'video':
-        return (
-          <div className="block-placeholder">
-            <div className="placeholder-icon">🎥</div>
-            <p className="placeholder-title">בלוק וידאו</p>
-            <p className="placeholder-description">לחץ על כפתור העריכה כדי להוסיף וידאו</p>
-          </div>
-        );
-      case 'gif':
-        return (
-          <div className="block-placeholder">
-            <div className="placeholder-icon">🎬</div>
-            <p className="placeholder-title">בלוק GIF</p>
-            <p className="placeholder-description">לחץ על כפתור העריכה כדי להוסיף GIF</p>
-          </div>
-        );
-      case 'link':
-        return (
-          <div className="block-placeholder">
-            <div className="placeholder-icon">🔗</div>
-            <p className="placeholder-title">בלוק קישור</p>
-            <p className="placeholder-description">לחץ על כפתור העריכה כדי להוסיף קישור</p>
-          </div>
-        );
-      case 'form':
-        return (
-          <div className="block-placeholder">
-            <div className="placeholder-icon">📋</div>
-            <p className="placeholder-title">בלוק טופס</p>
-            <p className="placeholder-description">לחץ על כפתור העריכה כדי להוסיף טופס</p>
-          </div>
-        );
-      default:
-        return (
-          <div className="block-placeholder">
-            <div className="placeholder-icon">❓</div>
-            <p className="placeholder-title">בלוק לא ידוע</p>
-            <p className="placeholder-description">סוג בלוק לא נתמך</p>
-          </div>
-        );
-    }
+    const icon = getBlockTypeIcon(block.type);
+    const typeName = getBlockTypeName(block.type);
+    const placeholder = getBlockTypePlaceholder(block.type);
+    
+    return (
+      <div className="block-placeholder">
+        <div className="placeholder-icon">{icon}</div>
+        <p className="placeholder-title">בלוק {typeName}</p>
+        <p className="placeholder-description">{placeholder}</p>
+      </div>
+    );
   };
 
   const renderContent = () => {
