@@ -15,14 +15,13 @@ export const useMondayApi = () => {
             if (storedString && storedString.trim() !== '') {
                 return JSON.parse(storedString);
             }
-            // If no data, save and return the default template
-            console.log("No data found, initializing with default template.");
-            await monday.storage.instance.setItem('guideData', JSON.stringify(DEFAULT_GUIDE_TEMPLATE));
-            return DEFAULT_GUIDE_TEMPLATE;
+            // If no data, return null to show setup screen
+            console.log("No data found, returning null to show setup screen.");
+            return null;
         } catch (error) {
-            console.error("Failed to fetch or initialize guide data:", error);
-            // On failure, return the default template as a fallback
-            return DEFAULT_GUIDE_TEMPLATE;
+            console.error("Failed to fetch guide data:", error);
+            // On failure, return null to show setup screen
+            return null;
         }
     }, []);
 
@@ -41,7 +40,7 @@ export const useMondayApi = () => {
                 const verifyRes = await monday.storage.instance.getItem('guideData');
                 if (verifyRes.data.value) {
                     console.log(`Save attempt ${attempt}: Success!`);
-                    monday.execute('notice', { message: 'המדריך נשמר בהצלחה!', type: 'success' });
+                    monday.execute('notice', { message: 'המדריך נשמר בהצלחה', type: 'success' });
                     return true;
                 }
             } catch (error) {

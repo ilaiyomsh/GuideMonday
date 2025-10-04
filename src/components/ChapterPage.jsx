@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useGuide } from '../context/GuideContext';
 import ContentBlock from './ContentBlock';
-import { Edit, MoveArrowUp, MoveArrowDown, Delete } from '@vibe/icons';
+import { Edit, MoveArrowUp, MoveArrowDown, Delete, TextFormatting, Image, Video, Gif, Link, Form } from '@vibe/icons';
 
 export default function ChapterPage({ chapter, onNavigate }) {
-  const { isEditMode, handleAddSection, handleAddContentBlock, handleUpdateChapter, handleUpdateSection, handleReorderSection, handleDeleteSection } = useGuide();
+  const { guideData, isEditMode, handleAddSection, handleAddContentBlock, handleUpdateChapter, handleUpdateSection, handleReorderSection, handleDeleteSection } = useGuide();
   const [expandedSections, setExpandedSections] = useState(new Set());
   const [editingChapter, setEditingChapter] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
   const [chapterData, setChapterData] = useState({ title: '', content: '' });
   const [sectionData, setSectionData] = useState({ title: '', content: '' });
+
+  // Find chapter index for numbering
+  const chapterIndex = guideData?.chapters?.findIndex(ch => ch.id === chapter?.id) ?? -1;
 
   // Collapse all sections when chapter changes
   useEffect(() => {
@@ -163,7 +166,7 @@ export default function ChapterPage({ chapter, onNavigate }) {
                     className="section-toggle-button"
                     onClick={() => toggleSectionExpansion(section.id)}
                   >
-                    <span>{index + 1}.{index + 1} {section.title}</span>
+                    <span>{chapterIndex + 1}.{index + 1} {section.title}</span>
                     <svg className="accordion-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
                     </svg>
@@ -219,15 +222,13 @@ export default function ChapterPage({ chapter, onNavigate }) {
                 </div>
               )}
               
-              {/* Section Content - Always visible */}
-              {section.content && (
-                <div className="section-content">
-                  <p>{section.content}</p>
-                </div>
-              )}
-              
-              {/* Content Blocks - Only visible when expanded */}
+              {/* Section Content and Content Blocks - Only visible when expanded */}
               <div className={`accordion-content ${isExpanded ? 'open' : ''}`}>
+                {section.content && (
+                  <div className="section-content">
+                    <p>{section.content}</p>
+                  </div>
+                )}
                 {section.contentBlocks && section.contentBlocks.map((block, blockIndex) => (
                   <ContentBlock 
                     key={block.id} 
@@ -248,45 +249,42 @@ export default function ChapterPage({ chapter, onNavigate }) {
                         title="הוסף טקסט"
                         onClick={() => handleAddContentBlock(chapter.id, section.id, 'text')}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.17,18 15,18V19H9V18C9.83,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z"></path>
-                        </svg>
+                        <TextFormatting />
                       </button>
                       <button 
                         className="add-block-button" 
                         title="הוסף תמונה"
                         onClick={() => handleAddContentBlock(chapter.id, section.id, 'image')}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M21,19V5C21,3.89 20.1,3 19,3H5C3.89,3 3,3.89 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5Z"></path>
-                        </svg>
+                        <Image />
                       </button>
                       <button 
                         className="add-block-button" 
                         title="הוסף וידאו"
                         onClick={() => handleAddContentBlock(chapter.id, section.id, 'video')}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z"></path>
-                        </svg>
+                        <Video />
                       </button>
                       <button 
                         className="add-block-button" 
                         title="הוסף GIF"
                         onClick={() => handleAddContentBlock(chapter.id, section.id, 'gif')}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M9,9H7.5V15H9V9M13,9H10.5V15H13V13H11.5V12H13V10.5H11.5V9.5H13V9M17,9H14V15H17V12.5H15.5V14H15V10.5H17V9Z"></path>
-                        </svg>
+                        <Gif />
                       </button>
                       <button 
                         className="add-block-button" 
                         title="הוסף קישור"
                         onClick={() => handleAddContentBlock(chapter.id, section.id, 'link')}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z"></path>
-                        </svg>
+                        <Link />
+                      </button>
+                      <button 
+                        className="add-block-button" 
+                        title="הוסף טופס"
+                        onClick={() => handleAddContentBlock(chapter.id, section.id, 'form')}
+                      >
+                        <Form />
                       </button>
                     </div>
                   </div>

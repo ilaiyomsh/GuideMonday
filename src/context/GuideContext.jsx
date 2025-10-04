@@ -4,6 +4,9 @@ import { useGuideManager } from '../hooks/useGuideManager';
 // 1. Create the context object
 const GuideContext = createContext(null);
 
+// Add displayName for better debugging and Fast Refresh compatibility
+GuideContext.displayName = 'GuideContext';
+
 /**
  * 2. Create a custom hook for easy consumption of the context.
  * Any component that calls useGuide() will get the value from the provider.
@@ -34,3 +37,6 @@ export const GuideProvider = ({ children }) => {
         </GuideContext.Provider>
     );
 };
+
+// Add displayName for Fast Refresh compatibility
+GuideProvider.displayName = 'GuideProvider';

@@ -63,8 +63,17 @@ export const useGuideManager = () => {
     const loadInitialData = async () => {
       setIsLoading(true);
       const data = await fetchGuide();
-      setGuideData(data);
-      setOriginalData(JSON.parse(JSON.stringify(data))); // Deep copy for comparison
+      
+      if (data) {
+        // Data found, set it up normally
+        setGuideData(data);
+        setOriginalData(JSON.parse(JSON.stringify(data))); // Deep copy for comparison
+      } else {
+        // No data found, set to null to show setup screen
+        setGuideData(null);
+        setOriginalData(null);
+      }
+      
       setIsLoading(false);
       
       // Check owner status after loading data
@@ -239,10 +248,11 @@ export const useGuideManager = () => {
   };
 
   const handleAddChapter = () => {
+    const chapterNumber = (guideData?.chapters?.length || 0) + 1;
     const newChapter = {
       id: generateId('chap'),
-      title: 'New Chapter',
-      content: 'Chapter description goes here.',
+      title: `פרק ${chapterNumber}: פרק חדש`,
+      content: 'תיאור הפרק יופיע כאן.',
       sections: []
     };
     setGuideData(prevData => ({
@@ -252,10 +262,15 @@ export const useGuideManager = () => {
   };
 
   const handleAddSection = (chapterId) => {
+    const chapter = guideData?.chapters?.find(ch => ch.id === chapterId);
+    const sectionNumber = (chapter?.sections?.length || 0) + 1;
+    const chapterIndex = guideData?.chapters?.findIndex(ch => ch.id === chapterId) ?? 0;
+    const chapterNumber = chapterIndex + 1;
+    
     const newSection = {
       id: generateId('sec'),
-      title: 'New Section',
-      content: 'Section description goes here.',
+      title: `${chapterNumber}.${sectionNumber} סעיף חדש`,
+      content: 'תיאור הסעיף יופיע כאן.',
       contentBlocks: []
     };
     setGuideData(prevData => ({
@@ -300,6 +315,22 @@ export const useGuideManager = () => {
     }));
   };
 
+  // Function to load guide data from external source (setup screen)
+  const loadGuideData = useCallback(async (newGuideData) => {
+    setGuideData(newGuideData);
+    setOriginalData(JSON.parse(JSON.stringify(newGuideData)));
+    
+    // Save the new guide data to Monday Storage
+    try {
+      await saveApi(newGuideData);
+      console.log("Guide data saved to Monday Storage successfully");
+    } catch (error) {
+      console.error("Failed to save guide data to Monday Storage:", error);
+    }
+    
+    setIsLoading(false);
+  }, [saveApi]);
+
   // Expose all state variables and handler functions for use in components
   return {
     guideData,
@@ -308,6 +339,7 @@ export const useGuideManager = () => {
     setIsEditMode,
     isOwner,
     hasChanges,
+    loadGuideData,
     handleSave,
     handleUpdateHomePage,
     handleUpdateChapter,

@@ -8,7 +8,8 @@ export default defineConfig(() => {
     },
     plugins: [react()],
     server: {
-      port: 8301,
+      port: 8080,
+      host: '0.0.0.0',
       allowedHosts: ['.apps-tunnel.monday.app']
     }
   };

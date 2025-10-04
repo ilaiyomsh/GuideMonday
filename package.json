@@ -13,15 +13,14 @@
   ],
   "homepage": ".",
   "scripts": {
-    "start": "npm run stop && concurrently \"npm run server\" \"npm run expose\"",
-    "deploy:build": "vite build",
-    "deploy:push": "mapps code:push --client-side -d \"build\"",
-    "deploy": "npm run deploy:build && npm run deploy:push",
-    "expose": "mapps tunnel:create -p 8301",
+    "start": "serve -s build -l 8080",
+    "build": "vite build --outDir build",
+    "deploy": "npm run build && mapps code:push --client-side -d \"build\"",
+    "dev": "concurrently \"npm run server\" \"npm run expose\"",
+    "expose": "mapps tunnel:create -p 8080",
     "server": "vite",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "stop": "kill-port 8301 && kill-port 4049 && kill-port 4040"
+    "stop": "kill-port 8080 || true && kill-port 4049 || true && kill-port 4040 || true",
+    "postinstall": "npm run build"
   },
   "dependencies": {
     "@mondaycom/apps-sdk": "^2.1.2",
@@ -30,7 +29,8 @@
     "classnames": "^2.5.1",
     "dompurify": "^3.2.7",
     "draft-js": "^0.11.7",
-    "monday-sdk-js": "^0.5.5"
+    "monday-sdk-js": "^0.5.5",
+    "serve": "^14.2.3"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -53,10 +53,11 @@
     "concurrently": "^5.2.0",
     "cross-port-killer": "^1.2.1",
     "eslint-config-react-app": "^7.0.1",
+    "kill-port": "^2.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sass": "^1.54.8",
-    "vite": "^6.2.2"
+    "vite": "^5.3.4"
   },
   "type": "module"
 }

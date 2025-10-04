@@ -5,12 +5,14 @@ import { useGuide } from './context/GuideContext.jsx';
 import Sidebar from './components/Sidebar';
 import HomePage from './components/HomePage';
 import ChapterPage from './components/ChapterPage';
+import GuideSetup from './components/GuideSetup';
 import { Loader, Box } from '@vibe/core';
 
 export default function App() {
-  const { guideData, isLoading, isEditMode } = useGuide();
+  const { guideData, isLoading, isEditMode, loadGuideData } = useGuide();
   const [currentPage, setCurrentPage] = useState('home-page');
   const [currentChapterId, setCurrentChapterId] = useState(null);
+  const [showSetup, setShowSetup] = useState(false);
 
   const handleNavigate = (pageType, chapterId = null) => {
     if (pageType === 'home-page') {
@@ -22,9 +24,19 @@ export default function App() {
     }
   };
 
+  const handleGuideLoad = async (newGuideData) => {
+    await loadGuideData(newGuideData);
+    setShowSetup(false);
+  };
+
   const currentChapter = guideData?.chapters?.find(ch => ch.id === currentChapterId);
 
-  if (isLoading || !guideData) {
+  // Show setup screen if no guide data and not loading
+  if (!isLoading && !guideData) {
+    return <GuideSetup onGuideLoad={handleGuideLoad} />;
+  }
+
+  if (isLoading) {
     return (
       <Box 
         className="loading-container"

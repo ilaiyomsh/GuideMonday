@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGuide } from '../context/GuideContext';
 import DraftTextEditor from './DraftTextEditor';
+import mondaySdk from 'monday-sdk-js';
 
 export default function ContentBlockEditDialog({ 
   isOpen, 
@@ -15,6 +16,9 @@ export default function ContentBlockEditDialog({
   const [errors, setErrors] = useState({});
   const [showColorPalette, setShowColorPalette] = useState(false);
   const [savedRange, setSavedRange] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  const monday = mondaySdk();
 
   useEffect(() => {
     if (block) {
@@ -59,6 +63,156 @@ export default function ContentBlockEditDialog({
     }
   };
 
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type based on block type
+    let isValidType = false;
+    let errorMessage = '';
+    
+    switch (block?.type) {
+      case 'image':
+        isValidType = file.type.startsWith('image/');
+        errorMessage = 'אנא בחרו קובץ תמונה בלבד';
+        break;
+      case 'video':
+        isValidType = file.type.startsWith('video/');
+        errorMessage = 'אנא בחרו קובץ וידאו בלבד';
+        break;
+      case 'gif':
+        isValidType = file.type === 'image/gif';
+        errorMessage = 'אנא בחרו קובץ GIF בלבד';
+        break;
+      default:
+        isValidType = file.type.startsWith('image/');
+        errorMessage = 'אנא בחרו קובץ תמונה בלבד';
+    }
+
+    if (!isValidType) {
+      setErrors(prev => ({ ...prev, file: errorMessage }));
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, file: 'גודל הקובץ חייב להיות קטן מ-10MB' }));
+      return;
+    }
+
+    setIsUploading(true);
+    setErrors(prev => ({ ...prev, file: null }));
+
+    try {
+      // Upload file to Monday.com using the provided logic
+      const result = await uploadFileWithSdk(file, '9265392875', 'file_mkw7h32e');
+      
+      console.log('Upload successful:', result);
+      console.log('File URL:', result.url);
+      
+      // Update form data with the uploaded URL
+      setFormData(prev => ({ ...prev, url: result.url }));
+      
+      // Clear any previous file errors
+      setErrors(prev => ({ ...prev, file: null }));
+      
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      setErrors(prev => ({ 
+        ...prev, 
+        file: 'שגיאה בהעלאת הקובץ. אנא נסו שוב.' 
+      }));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Upload file to Monday.com using SDK
+  const uploadFileWithSdk = async (file, boardId, columnId) => {
+    try {
+      // --- שלב 1: יצירת אייטם חדש ---
+      console.log("שלב 1: יוצר אייטם חדש...");
+      const createItemQuery = `
+        mutation ($boardId: ID!, $itemName: String!) {
+          create_item(board_id: $boardId, item_name: $itemName) {
+            id
+          }
+        }
+      `;
+      const createItemVars = { boardId, itemName: file.name };
+
+      const createItemResponse = await monday.api(createItemQuery, { variables: createItemVars });
+      const itemId = createItemResponse.data?.create_item?.id;
+
+      if (!itemId) {
+        throw new Error("Failed to create item. Response: " + JSON.stringify(createItemResponse));
+      }
+      console.log(`אייטם נוצר בהצלחה, מזהה: ${itemId}`);
+
+      // --- שלב 2: העלאת הקובץ לאייטם באמצעות monday.api ---
+      console.log("שלב 2: מעלה את הקובץ...");
+      const addFileQuery = `
+        mutation ($file: File!, $itemId: ID!, $columnId: String!) {
+          add_file_to_column(
+            item_id: $itemId, 
+            column_id: $columnId, 
+            file: $file
+          ) {
+            id
+          }
+        }
+      `;
+
+      const addFileVars = { 
+        file: file, 
+        itemId: itemId, 
+        columnId: columnId 
+      };
+
+      const uploadResponse = await monday.api(addFileQuery, { variables: addFileVars });
+      const assetId = uploadResponse.data?.add_file_to_column?.id;
+
+      if (!assetId) {
+        throw new Error("Failed to upload file. Response: " + JSON.stringify(uploadResponse));
+      }
+      console.log(`הקובץ הועלה בהצלחה, מזהה נכס (asset): ${assetId}`);
+
+      // --- שלב 3: קבלת ה-URL הציבורי של הקובץ ---
+      console.log("שלב 3: מאחזר את כתובת ה-URL...");
+      const getUrlQuery = `
+        query ($assetId: ID!) {
+          assets(ids: [$assetId]) {
+            public_url
+          }
+        }
+      `;
+      const getUrlVars = { assetId };
+
+      const getUrlResponse = await monday.api(getUrlQuery, { variables: getUrlVars });
+      const url = getUrlResponse.data?.assets?.[0]?.public_url;
+
+      if (!url) {
+        throw new Error("Failed to get public URL. Response: " + JSON.stringify(getUrlResponse));
+      }
+      console.log(`כתובת URL התקבלה: ${url}`);
+
+      // --- החזרת התוצאה הסופית ---
+      return {
+        itemId,
+        assetId,
+        url,
+      };
+
+    } catch (error) {
+      console.error("An error occurred during the Monday.com SDK upload process:", error);
+      throw error;
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -70,17 +224,37 @@ export default function ContentBlockEditDialog({
         break;
       case 'image':
         if (!formData.url?.trim()) {
-        newErrors.url = 'URL נדרש';
+          newErrors.url = 'URL התמונה נדרש';
         }
         break;
       case 'video':
+        if (formData.inputType === 'url') {
+          if (!formData.url?.trim()) {
+            newErrors.url = 'URL הוידאו נדרש';
+          }
+        } else if (formData.inputType === 'embedCode') {
         if (!formData.embedCode?.trim()) {
           newErrors.embedCode = 'קוד הטמעה נדרש';
+          }
+        } else if (formData.inputType === 'upload') {
+          if (!formData.url?.trim()) {
+            newErrors.file = 'יש להעלות קובץ וידאו';
+          }
         }
         break;
       case 'gif':
+        if (formData.inputType === 'url') {
+          if (!formData.url?.trim()) {
+            newErrors.url = 'URL ה-GIF נדרש';
+          }
+        } else if (formData.inputType === 'embedCode') {
         if (!formData.embedCode?.trim()) {
           newErrors.embedCode = 'קוד הטמעה נדרש';
+          }
+        } else if (formData.inputType === 'upload') {
+          if (!formData.url?.trim()) {
+            newErrors.file = 'יש להעלות קובץ GIF';
+          }
         }
         break;
       case 'link':
@@ -89,6 +263,11 @@ export default function ContentBlockEditDialog({
         }
         if (!formData.text?.trim()) {
           newErrors.text = 'טקסט הקישור נדרש';
+        }
+        break;
+      case 'form':
+        if (!formData.embedCode?.trim()) {
+          newErrors.embedCode = 'קוד הטמעת הטופס נדרש';
         }
         break;
     }
@@ -183,17 +362,43 @@ export default function ContentBlockEditDialog({
         return (
           <>
             <div className="form-field">
-              <label htmlFor="url">URL התמונה *</label>
+              <label>אפשרויות תמונה *</label>
+              <div className="upload-options">
+                <button
+                  type="button"
+                  className="upload-button"
+                  onClick={triggerFileInput}
+                  disabled={isUploading}
+                >
+                  {isUploading ? 'מעלה...' : '📁 העלה תמונה מהמחשב'}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  style={{ display: 'none' }}
+                />
+                {errors.file && <span className="error-message">{errors.file}</span>}
+              </div>
+            </div>
+            
+            <div className="form-field">
+              <label htmlFor="url">או הכנס URL התמונה *</label>
               <input
                 id="url"
                 type="url"
                 value={formData.url || ''}
                 onChange={(e) => handleInputChange('url', e.target.value)}
                 className={errors.url ? 'error' : ''}
-                placeholder="https://example.com/image.jpg"
+                placeholder="https://example.com/image.jpg או https://images.unsplash.com/photo-..."
               />
               {errors.url && <span className="error-message">{errors.url}</span>}
+              <div className="form-help">
+                <p>💡 טיפ: ודאו שה-URL חוקי ונגיש כדי שהתמונה תוצג כראוי</p>
+              </div>
             </div>
+            
             <div className="form-field">
               <label htmlFor="caption">כיתוב</label>
               <input
@@ -201,8 +406,11 @@ export default function ContentBlockEditDialog({
                 type="text"
                 value={formData.caption || ''}
                 onChange={(e) => handleInputChange('caption', e.target.value)}
-                placeholder="כיתוב התמונה (אופציונלי)"
+                placeholder="תיאור קצר של התמונה או הסבר על תוכנה"
               />
+              <div className="form-help">
+                <p>💡 טיפ: השתמשו ב-URL של תמונות מ-Unsplash, Pexels או העלו תמונה מהמחשב</p>
+              </div>
             </div>
           </>
         );
@@ -211,17 +419,100 @@ export default function ContentBlockEditDialog({
         return (
           <>
             <div className="form-field">
-              <label htmlFor="embedCode">קוד הטמעה *</label>
+              <label>אפשרויות וידאו *</label>
+              <div className="radio-group">
+                <label className="radio-option">
+                  <input
+                    type="radio"
+                    name="videoInputType"
+                    value="url"
+                    checked={formData.inputType === 'url'}
+                    onChange={(e) => handleInputChange('inputType', e.target.value)}
+                  />
+                  <span>URL הוידאו</span>
+                </label>
+                <label className="radio-option">
+                  <input
+                    type="radio"
+                    name="videoInputType"
+                    value="embedCode"
+                    checked={formData.inputType === 'embedCode'}
+                    onChange={(e) => handleInputChange('inputType', e.target.value)}
+                  />
+                  <span>קוד הטמעה HTML</span>
+                </label>
+                <label className="radio-option">
+                  <input
+                    type="radio"
+                    name="videoInputType"
+                    value="upload"
+                    checked={formData.inputType === 'upload'}
+                    onChange={(e) => handleInputChange('inputType', e.target.value)}
+                  />
+                  <span>העלאת קובץ מהמחשב</span>
+                </label>
+              </div>
+            </div>
+
+            {formData.inputType === 'url' ? (
+              <div className="form-field">
+                <label htmlFor="url">URL הוידאו *</label>
+                <input
+                  id="url"
+                  type="url"
+                  value={formData.url || ''}
+                  onChange={(e) => handleInputChange('url', e.target.value)}
+                  className={errors.url ? 'error' : ''}
+                  placeholder="https://www.youtube.com/watch?v=... או https://vimeo.com/... או https://player.vimeo.com/video/..."
+                />
+                {errors.url && <span className="error-message">{errors.url}</span>}
+                <div className="form-help">
+                  <p>💡 טיפ: העתיקו את ה-URL המלא של הוידאו מ-YouTube או Vimeo</p>
+                </div>
+              </div>
+            ) : formData.inputType === 'embedCode' ? (
+              <div className="form-field">
+                <label htmlFor="embedCode">קוד הטמעה HTML *</label>
               <textarea
                 id="embedCode"
                 value={formData.embedCode || ''}
                 onChange={(e) => handleInputChange('embedCode', e.target.value)}
                 className={errors.embedCode ? 'error' : ''}
                 rows="6"
-                placeholder="הדביקו את קוד ההטמעה HTML כאן..."
+                  placeholder="&lt;iframe src='https://www.youtube.com/embed/...' width='560' height='315'&gt;&lt;/iframe&gt;"
               />
               {errors.embedCode && <span className="error-message">{errors.embedCode}</span>}
+                <div className="form-help">
+                  <p>💡 טיפ: השתמשו בקוד ההטמעה המלא מ-YouTube או Vimeo</p>
+                </div>
+              </div>
+            ) : (
+              <div className="form-field">
+                <label>העלאת קובץ וידאו *</label>
+                <div className="upload-options">
+                  <button
+                    type="button"
+                    className="upload-button"
+                    onClick={triggerFileInput}
+                    disabled={isUploading}
+                  >
+                    {isUploading ? 'מעלה...' : '🎥 העלה קובץ וידאו מהמחשב'}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="video/*"
+                    onChange={handleFileUpload}
+                    style={{ display: 'none' }}
+                  />
+                  {errors.file && <span className="error-message">{errors.file}</span>}
+                </div>
+                <div className="form-help">
+                  <p>💡 טיפ: תומך בפורמטים MP4, AVI, MOV, WMV ועוד</p>
+                </div>
             </div>
+            )}
+
             <div className="form-field">
               <label htmlFor="title">כותרת הוידאו</label>
               <input
@@ -229,8 +520,11 @@ export default function ContentBlockEditDialog({
                 type="text"
                 value={formData.title || ''}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                placeholder="כותרת הוידאו (אופציונלי)"
+                placeholder="שם הוידאו או כותרת מתאימה"
               />
+              <div className="form-help">
+                <p>💡 טיפ: תומך ב-YouTube, Vimeo ורוב שירותי הוידאו הפופולריים</p>
+              </div>
             </div>
           </>
         );
@@ -239,17 +533,100 @@ export default function ContentBlockEditDialog({
         return (
           <>
             <div className="form-field">
-              <label htmlFor="embedCode">קוד הטמעה *</label>
+              <label>אפשרויות GIF *</label>
+              <div className="radio-group">
+                <label className="radio-option">
+                  <input
+                    type="radio"
+                    name="gifInputType"
+                    value="url"
+                    checked={formData.inputType === 'url'}
+                    onChange={(e) => handleInputChange('inputType', e.target.value)}
+                  />
+                  <span>URL ה-GIF</span>
+                </label>
+                <label className="radio-option">
+                  <input
+                    type="radio"
+                    name="gifInputType"
+                    value="embedCode"
+                    checked={formData.inputType === 'embedCode'}
+                    onChange={(e) => handleInputChange('inputType', e.target.value)}
+                  />
+                  <span>קוד הטמעה HTML</span>
+                </label>
+                <label className="radio-option">
+                  <input
+                    type="radio"
+                    name="gifInputType"
+                    value="upload"
+                    checked={formData.inputType === 'upload'}
+                    onChange={(e) => handleInputChange('inputType', e.target.value)}
+                  />
+                  <span>העלאת קובץ מהמחשב</span>
+                </label>
+              </div>
+            </div>
+
+            {formData.inputType === 'url' ? (
+              <div className="form-field">
+                <label htmlFor="url">URL ה-GIF *</label>
+                <input
+                  id="url"
+                  type="url"
+                  value={formData.url || ''}
+                  onChange={(e) => handleInputChange('url', e.target.value)}
+                  className={errors.url ? 'error' : ''}
+                  placeholder="https://media.giphy.com/media/... או https://i.giphy.com/media/... או https://example.com/animation.gif"
+                />
+                {errors.url && <span className="error-message">{errors.url}</span>}
+                <div className="form-help">
+                  <p>💡 טיפ: העתיקו את ה-URL הישיר של ה-GIF מ-GIPHY או שירות דומה</p>
+                </div>
+              </div>
+            ) : formData.inputType === 'embedCode' ? (
+              <div className="form-field">
+                <label htmlFor="embedCode">קוד הטמעה HTML *</label>
               <textarea
                 id="embedCode"
                 value={formData.embedCode || ''}
                 onChange={(e) => handleInputChange('embedCode', e.target.value)}
                 className={errors.embedCode ? 'error' : ''}
                 rows="6"
-                placeholder="הדביקו את קוד ההטמעה HTML כאן..."
+                  placeholder="&lt;img src='https://media.giphy.com/media/.../giphy.gif' alt='תיאור' /&gt;"
               />
               {errors.embedCode && <span className="error-message">{errors.embedCode}</span>}
+                <div className="form-help">
+                  <p>💡 טיפ: השתמשו בקוד HTML המלא עם תגיות img או iframe</p>
+                </div>
+              </div>
+            ) : (
+              <div className="form-field">
+                <label>העלאת קובץ GIF *</label>
+                <div className="upload-options">
+                  <button
+                    type="button"
+                    className="upload-button"
+                    onClick={triggerFileInput}
+                    disabled={isUploading}
+                  >
+                    {isUploading ? 'מעלה...' : '🎬 העלה קובץ GIF מהמחשב'}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/gif"
+                    onChange={handleFileUpload}
+                    style={{ display: 'none' }}
+                  />
+                  {errors.file && <span className="error-message">{errors.file}</span>}
+                </div>
+                <div className="form-help">
+                  <p>💡 טיפ: תומך בפורמט GIF בלבד</p>
+                </div>
             </div>
+            )}
+
             <div className="form-field">
               <label htmlFor="caption">כיתוב</label>
               <input
@@ -257,8 +634,11 @@ export default function ContentBlockEditDialog({
                 type="text"
                 value={formData.caption || ''}
                 onChange={(e) => handleInputChange('caption', e.target.value)}
-                placeholder="כיתוב ה-GIF (אופציונלי)"
+                placeholder="תיאור של מה ה-GIF מציג או הסבר על הפעולה"
               />
+              <div className="form-help">
+                <p>💡 טיפ: GIPHY, Tenor ו-Imgur הם מקורות מצוינים ל-GIFים איכותיים</p>
+              </div>
             </div>
           </>
         );
@@ -274,7 +654,7 @@ export default function ContentBlockEditDialog({
                 value={formData.url || ''}
                 onChange={(e) => handleInputChange('url', e.target.value)}
                 className={errors.url ? 'error' : ''}
-                placeholder="https://example.com"
+                placeholder="https://example.com או https://www.google.com או כל URL אחר"
               />
               {errors.url && <span className="error-message">{errors.url}</span>}
             </div>
@@ -286,7 +666,7 @@ export default function ContentBlockEditDialog({
                 value={formData.text || ''}
                 onChange={(e) => handleInputChange('text', e.target.value)}
                 className={errors.text ? 'error' : ''}
-                placeholder="טקסט שיוצג כקישור"
+                placeholder="הטקסט שיוצג על הקישור (לחץ כאן, קרא עוד, וכו')"
               />
               {errors.text && <span className="error-message">{errors.text}</span>}
             </div>
@@ -297,8 +677,48 @@ export default function ContentBlockEditDialog({
                 type="text"
                 value={formData.description || ''}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="תיאור הקישור (אופציונלי)"
+                placeholder="תיאור קצר של לאן הקישור מוביל או מה הוא מכיל"
               />
+              <div className="form-help">
+                <p>💡 טיפ: הקישור יפתח בחלון חדש כדי לא להסיט את המשתמש מהמדריך</p>
+              </div>
+            </div>
+          </>
+        );
+
+      case 'form':
+        return (
+          <>
+            <div className="form-field">
+              <label htmlFor="embedCode">קוד הטמעת הטופס *</label>
+              <textarea
+                id="embedCode"
+                value={formData.embedCode || ''}
+                onChange={(e) => handleInputChange('embedCode', e.target.value)}
+                className={errors.embedCode ? 'error' : ''}
+                rows="6"
+                placeholder="הדביקו את קוד ההטמעה המלא של הטופס כאן..."
+              />
+              {errors.embedCode && <span className="error-message">{errors.embedCode}</span>}
+              <div className="form-help">
+                <p>דוגמה לקוד הטמעה:</p>
+                <code>
+                  &lt;iframe src="https://forms.monday.com/forms/embed/..." width="650" height="500" style="border: 0; box-shadow: 5px 5px 56px 0px rgba(0,0,0,0.25);"&gt;&lt;/iframe&gt;
+                </code>
+              </div>
+            </div>
+            <div className="form-field">
+              <label htmlFor="title">כותרת הטופס</label>
+              <input
+                id="title"
+                type="text"
+                value={formData.title || ''}
+                onChange={(e) => handleInputChange('title', e.target.value)}
+                placeholder="שם הטופס או כותרת מתאימה (למשל: טופס יצירת קשר, שאלון משוב)"
+              />
+              <div className="form-help">
+                <p>💡 טיפ: הטופס יוצג במלואו בתוך המדריך ויאפשר למשתמשים למלא אותו ישירות</p>
+              </div>
             </div>
           </>
         );
@@ -339,7 +759,8 @@ function getBlockTypeName(type) {
     image: 'תמונה',
     video: 'וידאו',
     gif: 'GIF',
-    link: 'קישור'
+    link: 'קישור',
+    form: 'טופס'
   };
   return typeNames[type] || type;
 }

@@ -6,7 +6,7 @@ export default function Sidebar({ currentPage, currentChapterId, onNavigate }) {
   const { guideData, isEditMode, setIsEditMode, isOwner, handleAddChapter, handleReorderChapter, handleDeleteChapter, handleReorderSection, handleDeleteSection, handleSave } = useGuide();
   
   // Log isOwner status to console
-  console.log("🔍 Sidebar - isOwner status:", isOwner);
+ // console.log("🔍 Sidebar - isOwner status:", isOwner);
   const [expandedChapters, setExpandedChapters] = useState(new Set());
 
   const handleEditModeToggle = () => {
