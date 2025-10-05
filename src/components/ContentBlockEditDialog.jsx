@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGuide } from '../context/GuideContext';
 import DraftTextEditor from './DraftTextEditor';
-import mondaySdk from 'monday-sdk-js';
 import { getBlockTypeName } from '../constants/blockTypes';
-import { MONDAY_CONFIG, FILE_UPLOAD } from '../constants/config';
+import { FILE_UPLOAD } from '../constants/config';
+import { useMondayApi } from '../hooks/useMondayApi';
 
 export default function ContentBlockEditDialog({ 
   isOpen, 
@@ -13,14 +13,20 @@ export default function ContentBlockEditDialog({
   sectionId, 
   blockIndex 
 }) {
-  const { handleUpdateContentBlock, direction } = useGuide();
+  const { 
+    handleUpdateContentBlock, 
+    direction, 
+    guideName, 
+    getChapterContext, 
+    getSectionContext 
+  } = useGuide();
+  const { uploadFileToMediaBoard } = useMondayApi();
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
   const [showColorPalette, setShowColorPalette] = useState(false);
   const [savedRange, setSavedRange] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
-  const monday = mondaySdk();
 
   useEffect(() => {
     if (block) {
@@ -106,17 +112,31 @@ export default function ContentBlockEditDialog({
     setErrors(prev => ({ ...prev, file: null }));
 
     try {
-      // Upload file to Monday.com using the provided logic
-      const result = await uploadFileWithSdk(file, MONDAY_CONFIG.BOARD_ID, MONDAY_CONFIG.FILE_COLUMN_ID);
+      // הכנת context להעלאה
+      const chapterContext = getChapterContext(chapterId);
+      const sectionContext = getSectionContext(chapterId, sectionId);
+      
+      const context = {
+        guideName: guideName,
+        chapterName: chapterContext?.fullName || 'פרק לא ידוע',
+        sectionName: sectionContext?.fullName || 'סעיף לא ידוע'
+      };
+
+      console.log('🚀 מעלה קובץ עם context:', context);
+
+      // העלאה ללוח המדיה עם context מלא
+      const url = await uploadFileToMediaBoard(file, context);
       
       // Update form data with the uploaded URL
-      setFormData(prev => ({ ...prev, url: result.url }));
+      setFormData(prev => ({ ...prev, url: url }));
       
       // Clear any previous file errors
       setErrors(prev => ({ ...prev, file: null }));
       
+      console.log('✅ קובץ הועלה בהצלחה:', url);
+      
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error('❌ שגיאה בהעלאת הקובץ:', error);
       setErrors(prev => ({ 
         ...prev, 
         file: 'שגיאה בהעלאת הקובץ. אנא נסו שוב.' 
@@ -126,87 +146,7 @@ export default function ContentBlockEditDialog({
     }
   };
 
-  // Upload file to Monday.com using SDK
-  const uploadFileWithSdk = async (file, boardId, columnId) => {
-    try {
-      // --- שלב 1: יצירת אייטם חדש ---
-      console.log("שלב 1: יוצר אייטם חדש...");
-      const createItemQuery = `
-        mutation ($boardId: ID!, $itemName: String!) {
-          create_item(board_id: $boardId, item_name: $itemName) {
-            id
-          }
-        }
-      `;
-      const createItemVars = { boardId, itemName: file.name };
-
-      const createItemResponse = await monday.api(createItemQuery, { variables: createItemVars });
-      const itemId = createItemResponse.data?.create_item?.id;
-
-      if (!itemId) {
-        throw new Error("Failed to create item. Response: " + JSON.stringify(createItemResponse));
-      }
-      console.log(`אייטם נוצר בהצלחה, מזהה: ${itemId}`);
-
-      // --- שלב 2: העלאת הקובץ לאייטם באמצעות monday.api ---
-      console.log("שלב 2: מעלה את הקובץ...");
-      const addFileQuery = `
-        mutation ($file: File!, $itemId: ID!, $columnId: String!) {
-          add_file_to_column(
-            item_id: $itemId, 
-            column_id: $columnId, 
-            file: $file
-          ) {
-            id
-          }
-        }
-      `;
-
-      const addFileVars = { 
-        file: file, 
-        itemId: itemId, 
-        columnId: columnId 
-      };
-
-      const uploadResponse = await monday.api(addFileQuery, { variables: addFileVars });
-      const assetId = uploadResponse.data?.add_file_to_column?.id;
-
-      if (!assetId) {
-        throw new Error("Failed to upload file. Response: " + JSON.stringify(uploadResponse));
-      }
-      console.log(`הקובץ הועלה בהצלחה, מזהה נכס (asset): ${assetId}`);
-
-      // --- שלב 3: קבלת ה-URL הציבורי של הקובץ ---
-      console.log("שלב 3: מאחזר את כתובת ה-URL...");
-      const getUrlQuery = `
-        query ($assetId: ID!) {
-          assets(ids: [$assetId]) {
-            public_url
-          }
-        }
-      `;
-      const getUrlVars = { assetId };
-
-      const getUrlResponse = await monday.api(getUrlQuery, { variables: getUrlVars });
-      const url = getUrlResponse.data?.assets?.[0]?.public_url;
-
-      if (!url) {
-        throw new Error("Failed to get public URL. Response: " + JSON.stringify(getUrlResponse));
-      }
-      console.log(`כתובת URL התקבלה: ${url}`);
-
-      // --- החזרת התוצאה הסופית ---
-      return {
-        itemId,
-        assetId,
-        url,
-      };
-
-    } catch (error) {
-      console.error("An error occurred during the Monday.com SDK upload process:", error);
-      throw error;
-    }
-  };
+  // הפונקציה הישנה הוסרה - כעת משתמשים ב-uploadFileToMediaBoard מ-useMondayApi
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();

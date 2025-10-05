@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGuide } from '../context/GuideContext';
 import { Edit, MoveArrowUp, MoveArrowDown, Delete } from '@vibe/icons';
+import { getMediaBoardId } from '../services/mediaBoardService';
+import mondaySdk from 'monday-sdk-js';
 
 export default function Sidebar({ currentPage, currentChapterId, onNavigate }) {
   const { guideData, isEditMode, setIsEditMode, isOwner, handleAddChapter, handleReorderChapter, handleDeleteChapter, handleReorderSection, handleDeleteSection, handleSave } = useGuide();
@@ -8,6 +10,17 @@ export default function Sidebar({ currentPage, currentChapterId, onNavigate }) {
   // Log isOwner status to console
  // console.log("🔍 Sidebar - isOwner status:", isOwner);
   const [expandedChapters, setExpandedChapters] = useState(new Set());
+  const [mediaBoardId, setMediaBoardId] = useState(null);
+  const monday = mondaySdk();
+
+  // קבלת מזהה לוח המדיה
+  useEffect(() => {
+    const fetchMediaBoardId = async () => {
+      const boardId = await getMediaBoardId();
+      setMediaBoardId(boardId);
+    };
+    fetchMediaBoardId();
+  }, []);
 
   const handleEditModeToggle = () => {
     setIsEditMode(!isEditMode);
@@ -15,6 +28,15 @@ export default function Sidebar({ currentPage, currentChapterId, onNavigate }) {
 
   const handleSaveClick = async () => {
     await handleSave();
+  };
+
+  const handleOpenMediaBoard = () => {
+    if (mediaBoardId) {
+      const boardUrl = `https://mondaycode.monday.com/boards/${mediaBoardId}`;
+      monday.execute('openLinkInTab', { url: boardUrl });
+    } else {
+      alert('לוח המדיה עדיין לא נוצר');
+    }
   };
 
   const toggleChapterExpansion = (chapterId) => {
@@ -62,9 +84,31 @@ export default function Sidebar({ currentPage, currentChapterId, onNavigate }) {
               <span className="slider"></span>
             </label>
             {isEditMode && (
-              <button className="save-button" onClick={handleSaveClick}>
-                שמור
-              </button>
+              <>
+                <button className="save-button" onClick={handleSaveClick}>
+                  שמור
+                </button>
+                {mediaBoardId && (
+                  <button 
+                    className="media-board-button" 
+                    onClick={handleOpenMediaBoard}
+                    title="פתח לוח מדיה"
+                    style={{
+                      marginRight: '0.5rem',
+                      padding: '0.5rem 1rem',
+                      background: '#0085ff',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                      fontWeight: '500'
+                    }}
+                  >
+                    📂 לוח מדיה
+                  </button>
+                )}
+              </>
             )}
           </div>
         )}

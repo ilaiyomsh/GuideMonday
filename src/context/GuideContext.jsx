@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { useGuideManager } from '../hooks/useGuideManager';
 
 // 1. Create the context object
@@ -27,10 +27,54 @@ export const useGuide = () => {
  */
 export const GuideProvider = ({ children }) => {
     const guideManagerValues = useGuideManager();
+    
+    // פונקציות עזר לקבלת context של פרק וסעיף
+    const getChapterContext = useMemo(() => {
+        return (chapterId) => {
+            if (!guideManagerValues.guideData?.chapters) return null;
+            const chapterIndex = guideManagerValues.guideData.chapters.findIndex(ch => ch.id === chapterId);
+            if (chapterIndex === -1) return null;
+            const chapter = guideManagerValues.guideData.chapters[chapterIndex];
+            return {
+                name: chapter.title,
+                index: chapterIndex,
+                fullName: `פרק ${chapterIndex + 1}: ${chapter.title}`
+            };
+        };
+    }, [guideManagerValues.guideData]);
+
+    const getSectionContext = useMemo(() => {
+        return (chapterId, sectionId) => {
+            if (!guideManagerValues.guideData?.chapters) return null;
+            const chapter = guideManagerValues.guideData.chapters.find(ch => ch.id === chapterId);
+            if (!chapter?.sections) return null;
+            const sectionIndex = chapter.sections.findIndex(sec => sec.id === sectionId);
+            if (sectionIndex === -1) return null;
+            const section = chapter.sections[sectionIndex];
+            const chapterIndex = guideManagerValues.guideData.chapters.findIndex(ch => ch.id === chapterId);
+            return {
+                name: section.title,
+                index: sectionIndex,
+                fullName: `סעיף ${chapterIndex + 1}.${sectionIndex + 1}: ${section.title}`
+            };
+        };
+    }, [guideManagerValues.guideData]);
+
+    // שם המדריך
+    const guideName = useMemo(() => {
+        return guideManagerValues.guideData?.guideName || 
+               guideManagerValues.guideData?.homePage?.title || 
+               'המדריך שלי';
+    }, [guideManagerValues.guideData]);
+
     const contextValue = {
         ...guideManagerValues,
-        direction: 'rtl' // Hebrew direction
+        direction: 'rtl', // Hebrew direction
+        guideName,
+        getChapterContext,
+        getSectionContext
     };
+    
     return (
         <GuideContext.Provider value={contextValue}>
             {children}

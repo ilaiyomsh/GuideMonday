@@ -22,12 +22,33 @@ export const FILE_UPLOAD = {
 
 // Storage configuration
 export const STORAGE_KEYS = {
-  GUIDE_DATA: 'guideData'
+  GUIDE_DATA: 'guideData',
+  // Media Board Storage Keys
+  MEDIA_BOARD_ID: 'media_board',
+  MEDIA_BOARD_NAME_COL: 'media_board_name',
+  MEDIA_BOARD_FILE_COL: 'media_board_file',
+  MEDIA_BOARD_GUIDE_COL: 'media_board_guide',
+  MEDIA_BOARD_CHAPTER_COL: 'media_board_chapter',
+  MEDIA_BOARD_SECTION_COL: 'media_board_section',
+  MEDIA_BOARD_DATE_COL: 'media_board_date'
 };
 
 // API configuration
 export const API_CONFIG = {
-  VERSION: '2023-10',
+  VERSION: '2025-07',
   MAX_RETRIES: 3,
   RETRY_DELAY_MS: 500
+};
+
+// Media Board configuration
+export const MEDIA_BOARD_CONFIG = {
+  BOARD_NAME: 'Guide Media Storage',
+  BOARD_KIND: 'public', // main board
+  COLUMNS: [
+    { title: 'מדריך', type: 'dropdown', id: 'guide' },
+    { title: 'פרק', type: 'dropdown', id: 'chapter' },
+    { title: 'סעיף', type: 'dropdown', id: 'section' },
+    { title: 'תאריך יצירה', type: 'date', id: 'date' },
+    { title: 'קובץ', type: 'file', id: 'file' }
+  ]
 };

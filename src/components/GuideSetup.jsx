@@ -1,11 +1,18 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { DEFAULT_GUIDE_TEMPLATE } from '../defaultGuideTemplate';
+import { useMondayApi } from '../hooks/useMondayApi';
 
 export default function GuideSetup({ onGuideLoad }) {
   const [guideName, setGuideName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mediaBoardStatus, setMediaBoardStatus] = useState({
+    isInitializing: true,
+    isReady: false,
+    message: 'מכין תשתית אחסון קבצים...'
+  });
   const fileInputRef = useRef(null);
+  const { ensureMediaBoardReady } = useMondayApi();
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -95,12 +102,74 @@ export default function GuideSetup({ onGuideLoad }) {
     fileInputRef.current?.click();
   };
 
+  // אתחול לוח המדיה
+  useEffect(() => {
+    const initMediaBoard = async () => {
+      setMediaBoardStatus({
+        isInitializing: true,
+        isReady: false,
+        message: '🚀 מכין תשתית אחסון קבצים...'
+      });
+
+      try {
+        const isReady = await ensureMediaBoardReady();
+        
+        if (isReady) {
+          setMediaBoardStatus({
+            isInitializing: false,
+            isReady: true,
+            message: '✅ תשתית אחסון הקבצים מוכנה!'
+          });
+        } else {
+          setMediaBoardStatus({
+            isInitializing: false,
+            isReady: false,
+            message: '⚠️ לא הצלחנו להכין את תשתית הקבצים. תוכלו עדיין להשתמש במדריך.'
+          });
+        }
+      } catch (error) {
+        console.error('שגיאה באתחול לוח מדיה:', error);
+        setMediaBoardStatus({
+          isInitializing: false,
+          isReady: false,
+          message: '⚠️ שגיאה בהכנת תשתית הקבצים'
+        });
+      }
+    };
+
+    initMediaBoard();
+  }, [ensureMediaBoardReady]);
+
   return (
     <div className="guide-setup">
       <div className="setup-container">
         <div className="setup-header">
           <h1>🎯 מדריך אינטראקטיבי חדש</h1>
           <p>ברוכים הבאים! בחרו איך להתחיל את המדריך שלכם</p>
+          
+          {/* הצגת סטטוס לוח המדיה */}
+          {mediaBoardStatus.isInitializing && (
+            <div style={{ 
+              marginTop: '1rem', 
+              padding: '0.75rem', 
+              background: 'rgba(255,255,255,0.2)',
+              borderRadius: '8px',
+              fontSize: '0.9rem'
+            }}>
+              {mediaBoardStatus.message}
+            </div>
+          )}
+          {!mediaBoardStatus.isInitializing && (
+            <div style={{ 
+              marginTop: '1rem', 
+              padding: '0.75rem', 
+              background: mediaBoardStatus.isReady ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 193, 7, 0.2)',
+              borderRadius: '8px',
+              fontSize: '0.9rem'
+            }}>
+              {mediaBoardStatus.message}
+            </div>
+          )}
         </div>
 
         <div className="setup-content">
@@ -123,7 +192,7 @@ export default function GuideSetup({ onGuideLoad }) {
               <p>העלו קובץ JSON של מדריך ששמרתם בעבר</p>
               <button 
                 onClick={triggerFileInput}
-                disabled={isLoading}
+                disabled={isLoading || mediaBoardStatus.isInitializing}
                 className="option-button"
               >
                 {isLoading ? 'טוען...' : 'בחר קובץ JSON'}
@@ -143,7 +212,7 @@ export default function GuideSetup({ onGuideLoad }) {
               <p>הורידו קובץ JSON עם דוגמה למדריך מלא</p>
               <button 
                 onClick={handleDownloadTemplate}
-                disabled={isLoading}
+                disabled={isLoading || mediaBoardStatus.isInitializing}
                 className="option-button secondary"
               >
                 הורד תבנית
@@ -156,10 +225,10 @@ export default function GuideSetup({ onGuideLoad }) {
               <p>התחילו עם מדריך דוגמה מלא ומוכן לעריכה</p>
               <button 
                 onClick={handleLoadDefault}
-                disabled={isLoading}
+                disabled={isLoading || mediaBoardStatus.isInitializing}
                 className="option-button primary"
               >
-                {isLoading ? 'טוען...' : 'התחל עכשיו'}
+                {isLoading ? 'טוען...' : mediaBoardStatus.isInitializing ? 'מכין תשתית...' : 'התחל עכשיו'}
               </button>
             </div>
           </div>
