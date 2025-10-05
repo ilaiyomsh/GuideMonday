@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import mondaySdk from 'monday-sdk-js';
 import { DEFAULT_GUIDE_TEMPLATE } from "../defaultGuideTemplate";
 import { STORAGE_KEYS } from '../constants/config';
-import { initializeMediaBoard, checkMediaBoardExists } from '../services/mediaBoardService';
+import { initializeMediaBoard, checkMediaBoardExists, checkMediaBoardValidity } from '../services/mediaBoardService';
 
 const monday = mondaySdk();
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -114,6 +114,12 @@ export const useMondayApi = () => {
      */
     const uploadFileToMediaBoard = useCallback(async (file, context) => {
         try {
+            // בדיקת תקינות לוח המדיה לפני העלאה
+            const validity = await checkMediaBoardValidity();
+            if (!validity.isValid) {
+                throw new Error(`לוח המדיה לא זמין: ${validity.message}\n\nאנא צור לוח מדיה חדש דרך ההגדרות.`);
+            }
+
             // קבלת קונפיגורציה
             const config = await getMediaBoardConfig();
             if (!config) {

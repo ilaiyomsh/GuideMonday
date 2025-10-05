@@ -331,3 +331,122 @@ export const getMediaBoardUrlFromStorage = async () => {
     return null;
   }
 };
+
+/**
+ * בדיקת תקינות לוח המדיה - האם הלוח עדיין קיים ב-Monday
+ * @param {string} boardId - מזהה הלוח לבדיקה
+ * @returns {Promise<boolean>} - true אם הלוח קיים, false אם לא
+ */
+export const validateMediaBoard = async (boardId) => {
+  try {
+    if (!boardId) {
+      console.warn('⚠️ לא סופק מזהה לוח לבדיקה');
+      return false;
+    }
+    
+    const query = `
+      query {
+        boards (ids: ${boardId}) {
+          id
+          name
+        }
+      }
+    `;
+    
+    const response = await monday.api(query);
+    const board = response.data?.boards?.[0];
+    
+    if (board) {
+      console.log(`✅ לוח המדיה תקין: ${board.name} (${board.id})`);
+      return true;
+    } else {
+      console.warn(`⚠️ לוח המדיה לא נמצא: ${boardId}`);
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ שגיאה בבדיקת תקינות לוח המדיה:', error);
+    return false;
+  }
+};
+
+/**
+ * בדיקה מלאה של תקינות לוח המדיה
+ * בודקת אם יש מזהה לוח ב-storage ואם הלוח עדיין קיים ב-Monday
+ * @returns {Promise<{isValid: boolean, boardId: string|null, boardUrl: string|null, message: string}>}
+ */
+export const checkMediaBoardValidity = async () => {
+  try {
+    console.log('🔍 בודק תקינות לוח מדיה...');
+    
+    // בדיקה אם יש מזהה לוח ב-storage
+    const boardId = await getMediaBoardId();
+    const boardUrl = await getMediaBoardUrlFromStorage();
+    
+    if (!boardId) {
+      console.log('ℹ️ אין לוח מדיה מוגדר ב-storage');
+      return {
+        isValid: false,
+        boardId: null,
+        boardUrl: null,
+        message: 'אין לוח מדיה מוגדר'
+      };
+    }
+    
+    console.log(`🔍 בודק אם לוח ${boardId} קיים ב-Monday...`);
+    
+    // בדיקת תקינות הלוח
+    const isValid = await validateMediaBoard(boardId);
+    
+    if (!isValid) {
+      console.warn(`⚠️ לוח המדיה ${boardId} נמחק או לא קיים`);
+      return {
+        isValid: false,
+        boardId,
+        boardUrl,
+        message: 'לוח המדיה נמחק או לא נמצא'
+      };
+    }
+    
+    console.log('✅ לוח המדיה תקין ופעיל');
+    return {
+      isValid: true,
+      boardId,
+      boardUrl,
+      message: 'לוח המדיה תקין'
+    };
+  } catch (error) {
+    console.error('❌ שגיאה בבדיקת תקינות לוח המדיה:', error);
+    return {
+      isValid: false,
+      boardId: null,
+      boardUrl: null,
+      message: 'שגיאה בבדיקת לוח המדיה'
+    };
+  }
+};
+
+/**
+ * ניקוי storage של לוח מדיה
+ * מוחקת את כל המפתחות הקשורים ללוח המדיה
+ * @returns {Promise<boolean>}
+ */
+export const clearMediaBoardStorage = async () => {
+  try {
+    console.log('🧹 מנקה storage של לוח מדיה...');
+    
+    await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_ID);
+    await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_URL);
+    await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_NAME_COL);
+    await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_GUIDE_COL);
+    await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_CHAPTER_COL);
+    await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_SECTION_COL);
+    await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_DATE_COL);
+    await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_FILE_COL);
+    
+    console.log('✅ Storage של לוח מדיה נוקה בהצלחה');
+    return true;
+  } catch (error) {
+    console.error('❌ שגיאה בניקוי storage:', error);
+    return false;
+  }
+};

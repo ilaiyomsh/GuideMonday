@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
+import React, { createContext, useContext, useMemo, useState, useEffect, useCallback } from 'react';
 import { useGuideManager } from '../hooks/useGuideManager';
-import { initializeMediaBoard } from '../services/mediaBoardService';
+import { initializeMediaBoard, checkMediaBoardValidity, clearMediaBoardStorage } from '../services/mediaBoardService';
+import MediaBoardDialog from '../components/MediaBoardDialog';
 
 // 1. Create the context object
 const GuideContext = createContext(null);
@@ -38,51 +39,132 @@ export const GuideProvider = ({ children }) => {
         message: 'מכין תשתית אחסון קבצים...'
     });
 
-    // אתחול לוח המדיה פעם אחת בלבד
-    useEffect(() => {
-        let isMounted = true;
-        
-        const initMediaBoard = async () => {
-            setMediaBoardState(prev => ({
-                ...prev,
-                isInitializing: true,
-                message: '🚀 מכין תשתית אחסון קבצים...'
-            }));
+    // State לתיבת דו-שיח
+    const [mediaBoardDialog, setMediaBoardDialog] = useState({
+        isOpen: false,
+        isChecking: false,
+        message: '',
+        onConfirm: null,
+        onCancel: null
+    });
 
-            try {
-                const result = await initializeMediaBoard();
-                
-                if (!isMounted) return; // Prevent state update if unmounted
-                
-                if (result.success) {
-                    setMediaBoardState({
-                        isInitializing: false,
-                        isReady: true,
-                        boardId: result.boardId,
-                        boardUrl: result.boardUrl,
-                        message: '✅ תשתית אחסון הקבצים מוכנה!'
-                    });
-                } else {
-                    setMediaBoardState({
-                        isInitializing: false,
-                        isReady: false,
-                        boardId: null,
-                        boardUrl: null,
-                        message: `⚠️ ${result.message}`
-                    });
-                }
-            } catch (error) {
-                console.error('שגיאה באתחול לוח מדיה:', error);
-                
-                if (!isMounted) return;
-                
+    // פונקציה ליצירת לוח מדיה חדש
+    const initializeMediaBoardWithState = useCallback(async () => {
+        setMediaBoardState(prev => ({
+            ...prev,
+            isInitializing: true,
+            message: '🚀 יוצר לוח מדיה חדש...'
+        }));
+
+        try {
+            const result = await initializeMediaBoard();
+            
+            if (result.success) {
+                setMediaBoardState({
+                    isInitializing: false,
+                    isReady: true,
+                    boardId: result.boardId,
+                    boardUrl: result.boardUrl,
+                    message: '✅ לוח המדיה נוצר בהצלחה!'
+                });
+            } else {
                 setMediaBoardState({
                     isInitializing: false,
                     isReady: false,
                     boardId: null,
                     boardUrl: null,
-                    message: '⚠️ שגיאה בהכנת תשתית הקבצים'
+                    message: `⚠️ ${result.message}`
                 });
+            }
+        } catch (error) {
+            console.error('שגיאה ביצירת לוח מדיה:', error);
+            setMediaBoardState({
+                isInitializing: false,
+                isReady: false,
+                boardId: null,
+                boardUrl: null,
+                message: '⚠️ שגיאה ביצירת לוח המדיה'
+            });
+        }
+    }, []);
+
+    // פונקציה לבדיקת תקינות לוח מדיה עם תיבת דו-שיח
+    const checkMediaBoardWithDialog = useCallback(async () => {
+        setMediaBoardState(prev => ({
+            ...prev,
+            isInitializing: true,
+            message: '🔍 בודק תקינות לוח מדיה...'
+        }));
+
+        try {
+            const validity = await checkMediaBoardValidity();
+            
+            if (validity.isValid) {
+                // הלוח תקין - ממשיכים
+                setMediaBoardState({
+                    isInitializing: false,
+                    isReady: true,
+                    boardId: validity.boardId,
+                    boardUrl: validity.boardUrl,
+                    message: '✅ לוח המדיה תקין'
+                });
+                return;
+            }
+            
+            // הלוח לא תקין - מציגים תיבת אישור
+            setMediaBoardState(prev => ({
+                ...prev,
+                isInitializing: false
+            }));
+
+            setMediaBoardDialog({
+                isOpen: true,
+                isChecking: false,
+                message: `⚠️ ${validity.message}\n\nהאם ליצור לוח מדיה חדש?`,
+                onConfirm: async () => {
+                    setMediaBoardDialog(prev => ({ ...prev, isOpen: false }));
+                    // ניקוי storage הישן
+                    await clearMediaBoardStorage();
+                    // יצירת לוח חדש
+                    await initializeMediaBoardWithState();
+                },
+                onCancel: () => {
+                    setMediaBoardDialog(prev => ({ ...prev, isOpen: false }));
+                    setMediaBoardState({
+                        isInitializing: false,
+                        isReady: false,
+                        boardId: null,
+                        boardUrl: null,
+                        message: '⚠️ לוח מדיה לא זמין'
+                    });
+                }
+            });
+            
+        } catch (error) {
+            console.error('שגיאה בבדיקת לוח מדיה:', error);
+            setMediaBoardState({
+                isInitializing: false,
+                isReady: false,
+                boardId: null,
+                boardUrl: null,
+                message: '⚠️ שגיאה בבדיקת לוח המדיה'
+            });
+        }
+    }, [initializeMediaBoardWithState]);
+
+    // אתחול לוח המדיה - בדיקה אם יש מדריך טעון
+    useEffect(() => {
+        let isMounted = true;
+        
+        const initMediaBoard = async () => {
+            // אם יש מדריך טעון - בודקים תקינות לוח מדיה
+            if (guideManagerValues.guideData) {
+                console.log('📋 מדריך טעון - בודק תקינות לוח מדיה...');
+                await checkMediaBoardWithDialog();
+            } else {
+                // אין מדריך - יוצרים לוח מדיה חדש
+                console.log('🆕 אין מדריך - יוצר לוח מדיה חדש...');
+                await initializeMediaBoardWithState();
             }
         };
 
@@ -91,7 +173,7 @@ export const GuideProvider = ({ children }) => {
         return () => {
             isMounted = false;
         };
-    }, []); // Empty dependency array - run only once!
+    }, [guideManagerValues.guideData, checkMediaBoardWithDialog, initializeMediaBoardWithState]);
     
     // פונקציות עזר לקבלת context של פרק וסעיף
     const getChapterContext = useMemo(() => {
@@ -145,6 +227,13 @@ export const GuideProvider = ({ children }) => {
     return (
         <GuideContext.Provider value={contextValue}>
             {children}
+            <MediaBoardDialog
+                isOpen={mediaBoardDialog.isOpen}
+                isChecking={mediaBoardDialog.isChecking}
+                message={mediaBoardDialog.message}
+                onConfirm={mediaBoardDialog.onConfirm}
+                onCancel={mediaBoardDialog.onCancel}
+            />
         </GuideContext.Provider>
     );
 };
