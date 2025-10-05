@@ -159,11 +159,9 @@ export const GuideProvider = ({ children }) => {
         const initMediaBoard = async () => {
             // אם יש מדריך טעון - בודקים תקינות לוח מדיה
             if (guideManagerValues.guideData) {
-                console.log('📋 מדריך טעון - בודק תקינות לוח מדיה...');
                 await checkMediaBoardWithDialog();
             } else {
                 // אין מדריך - יוצרים לוח מדיה חדש
-                console.log('🆕 אין מדריך - יוצר לוח מדיה חדש...');
                 await initializeMediaBoardWithState();
             }
         };

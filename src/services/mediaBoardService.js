@@ -38,9 +38,8 @@ export const createMediaBoard = async () => {
     try {
       const context = await monday.get('context');
       ownerId = context?.data?.user?.id;
-      console.log(`👤 משתמש נוכחי: ${ownerId}`);
     } catch (contextError) {
-      console.warn('⚠️ לא הצלחנו לקבל context של המשתמש:', contextError);
+      // Silent fail - not critical
     }
 
     // יצירת הלוח עם או בלי owner
@@ -74,7 +73,6 @@ export const createMediaBoard = async () => {
       throw new Error('Failed to get board ID from response');
     }
     
-    console.log(`✅ לוח מדיה נוצר בהצלחה: ${boardId}`);
     return boardId;
   } catch (error) {
     console.error('❌ שגיאה ביצירת לוח מדיה:', error);
@@ -113,7 +111,6 @@ export const createMediaBoardColumns = async (boardId) => {
       }
       
       columnIds[column.id] = columnId;
-      console.log(`✅ עמודה נוצרה: ${column.title} (${columnId})`);
     }
     
     return columnIds;
@@ -145,7 +142,6 @@ export const getBoardUrl = async (boardId) => {
       throw new Error('Failed to get board URL from response');
     }
     
-    console.log(`✅ URL של הלוח: ${url}`);
     return url;
   } catch (error) {
     console.error('❌ שגיאה בקבלת URL של הלוח:', error);
@@ -174,7 +170,6 @@ export const saveMediaBoardConfig = async (boardId, boardUrl, columnIds) => {
     await monday.storage.setItem(STORAGE_KEYS.MEDIA_BOARD_DATE_COL, columnIds.date);
     await monday.storage.setItem(STORAGE_KEYS.MEDIA_BOARD_FILE_COL, columnIds.file);
     
-    console.log('✅ קונפיגורציית לוח מדיה נשמרה בהצלחה ב-storage גלובלי');
     return true;
   } catch (error) {
     console.error('❌ שגיאה בשמירת קונפיגורציה:', error);
@@ -190,7 +185,6 @@ export const saveMediaBoardConfig = async (boardId, boardUrl, columnIds) => {
 export const initializeMediaBoard = async () => {
   // 🔒 Lock Mechanism - אם כבר יש תהליך אתחול רץ, נחזיר את אותו Promise
   if (isInitializing && initializationPromise) {
-    console.log('⏳ אתחול כבר רץ, ממתין לתהליך הקיים...');
     return initializationPromise;
   }
 
@@ -203,7 +197,6 @@ export const initializeMediaBoard = async () => {
       // בדיקה ראשונה - האם כבר קיים?
       const exists = await checkMediaBoardExists();
       if (exists) {
-        console.log('✅ לוח המדיה כבר קיים ב-storage גלובלי');
         const boardIdRes = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_ID);
         const boardUrlRes = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_URL);
         const boardId = boardIdRes?.data?.value;
@@ -218,12 +211,9 @@ export const initializeMediaBoard = async () => {
       }
       
       // יצירת לוח חדש
-      console.log('🚀 מתחיל יצירת לוח מדיה...');
-      
       // 🔒 Double-Check - אולי תהליך מקביל כבר יצר?
       const doubleCheck = await checkMediaBoardExists();
       if (doubleCheck) {
-        console.log('⚠️ לוח כבר נוצר על ידי תהליך מקביל');
         const boardIdRes = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_ID);
         const boardUrlRes = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_URL);
         return {
@@ -245,7 +235,6 @@ export const initializeMediaBoard = async () => {
       }
       
       // קבלת URL של הלוח
-      console.log('🔗 מאחזר URL של הלוח...');
       const boardUrl = await getBoardUrl(boardId);
       if (!boardUrl) {
         return {
@@ -257,7 +246,6 @@ export const initializeMediaBoard = async () => {
       }
       
       // יצירת עמודות
-      console.log('📋 יוצר עמודות ללוח...');
       const columnIds = await createMediaBoardColumns(boardId);
       if (!columnIds) {
         return {
@@ -269,7 +257,6 @@ export const initializeMediaBoard = async () => {
       }
       
       // שמירת קונפיגורציה
-      console.log('💾 שומר קונפיגורציה...');
       const saved = await saveMediaBoardConfig(boardId, boardUrl, columnIds);
       if (!saved) {
         return {
@@ -340,7 +327,6 @@ export const getMediaBoardUrlFromStorage = async () => {
 export const validateMediaBoard = async (boardId) => {
   try {
     if (!boardId) {
-      console.warn('⚠️ לא סופק מזהה לוח לבדיקה');
       return false;
     }
     
@@ -356,13 +342,7 @@ export const validateMediaBoard = async (boardId) => {
     const response = await monday.api(query);
     const board = response.data?.boards?.[0];
     
-    if (board) {
-      console.log(`✅ לוח המדיה תקין: ${board.name} (${board.id})`);
-      return true;
-    } else {
-      console.warn(`⚠️ לוח המדיה לא נמצא: ${boardId}`);
-      return false;
-    }
+    return !!board;
   } catch (error) {
     console.error('❌ שגיאה בבדיקת תקינות לוח המדיה:', error);
     return false;
@@ -376,14 +356,11 @@ export const validateMediaBoard = async (boardId) => {
  */
 export const checkMediaBoardValidity = async () => {
   try {
-    console.log('🔍 בודק תקינות לוח מדיה...');
-    
     // בדיקה אם יש מזהה לוח ב-storage
     const boardId = await getMediaBoardId();
     const boardUrl = await getMediaBoardUrlFromStorage();
     
     if (!boardId) {
-      console.log('ℹ️ אין לוח מדיה מוגדר ב-storage');
       return {
         isValid: false,
         boardId: null,
@@ -392,13 +369,10 @@ export const checkMediaBoardValidity = async () => {
       };
     }
     
-    console.log(`🔍 בודק אם לוח ${boardId} קיים ב-Monday...`);
-    
     // בדיקת תקינות הלוח
     const isValid = await validateMediaBoard(boardId);
     
     if (!isValid) {
-      console.warn(`⚠️ לוח המדיה ${boardId} נמחק או לא קיים`);
       return {
         isValid: false,
         boardId,
@@ -407,7 +381,6 @@ export const checkMediaBoardValidity = async () => {
       };
     }
     
-    console.log('✅ לוח המדיה תקין ופעיל');
     return {
       isValid: true,
       boardId,
@@ -432,8 +405,6 @@ export const checkMediaBoardValidity = async () => {
  */
 export const clearMediaBoardStorage = async () => {
   try {
-    console.log('🧹 מנקה storage של לוח מדיה...');
-    
     await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_ID);
     await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_URL);
     await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_NAME_COL);
@@ -443,7 +414,6 @@ export const clearMediaBoardStorage = async () => {
     await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_DATE_COL);
     await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_FILE_COL);
     
-    console.log('✅ Storage של לוח מדיה נוקה בהצלחה');
     return true;
   } catch (error) {
     console.error('❌ שגיאה בניקוי storage:', error);
