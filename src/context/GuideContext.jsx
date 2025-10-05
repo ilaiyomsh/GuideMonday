@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useGuideManager } from '../hooks/useGuideManager';
+import { initializeMediaBoard } from '../services/mediaBoardService';
 
 // 1. Create the context object
 const GuideContext = createContext(null);
@@ -27,6 +28,70 @@ export const useGuide = () => {
  */
 export const GuideProvider = ({ children }) => {
     const guideManagerValues = useGuideManager();
+    
+    // State לניהול לוח המדיה - אתחול מרכזי פעם אחת
+    const [mediaBoardState, setMediaBoardState] = useState({
+        isInitializing: true,
+        isReady: false,
+        boardId: null,
+        boardUrl: null,
+        message: 'מכין תשתית אחסון קבצים...'
+    });
+
+    // אתחול לוח המדיה פעם אחת בלבד
+    useEffect(() => {
+        let isMounted = true;
+        
+        const initMediaBoard = async () => {
+            setMediaBoardState(prev => ({
+                ...prev,
+                isInitializing: true,
+                message: '🚀 מכין תשתית אחסון קבצים...'
+            }));
+
+            try {
+                const result = await initializeMediaBoard();
+                
+                if (!isMounted) return; // Prevent state update if unmounted
+                
+                if (result.success) {
+                    setMediaBoardState({
+                        isInitializing: false,
+                        isReady: true,
+                        boardId: result.boardId,
+                        boardUrl: result.boardUrl,
+                        message: '✅ תשתית אחסון הקבצים מוכנה!'
+                    });
+                } else {
+                    setMediaBoardState({
+                        isInitializing: false,
+                        isReady: false,
+                        boardId: null,
+                        boardUrl: null,
+                        message: `⚠️ ${result.message}`
+                    });
+                }
+            } catch (error) {
+                console.error('שגיאה באתחול לוח מדיה:', error);
+                
+                if (!isMounted) return;
+                
+                setMediaBoardState({
+                    isInitializing: false,
+                    isReady: false,
+                    boardId: null,
+                    boardUrl: null,
+                    message: '⚠️ שגיאה בהכנת תשתית הקבצים'
+                });
+            }
+        };
+
+        initMediaBoard();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []); // Empty dependency array - run only once!
     
     // פונקציות עזר לקבלת context של פרק וסעיף
     const getChapterContext = useMemo(() => {
@@ -72,7 +137,9 @@ export const GuideProvider = ({ children }) => {
         direction: 'rtl', // Hebrew direction
         guideName,
         getChapterContext,
-        getSectionContext
+        getSectionContext,
+        // Media Board State
+        mediaBoardState
     };
     
     return (

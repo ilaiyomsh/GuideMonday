@@ -25,6 +25,7 @@ export const STORAGE_KEYS = {
   GUIDE_DATA: 'guideData',
   // Media Board Storage Keys
   MEDIA_BOARD_ID: 'media_board',
+  MEDIA_BOARD_URL: 'media_board_url',
   MEDIA_BOARD_NAME_COL: 'media_board_name',
   MEDIA_BOARD_FILE_COL: 'media_board_file',
   MEDIA_BOARD_GUIDE_COL: 'media_board_guide',
