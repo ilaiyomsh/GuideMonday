@@ -23,7 +23,9 @@ export const FILE_UPLOAD = {
 // Storage configuration
 export const STORAGE_KEYS = {
   GUIDE_DATA: 'guideData',
-  // Media Board Storage Keys
+  // Media Board Storage Keys - Consolidated
+  MEDIA_BOARD_CONFIG: 'media_board_config', // מפתח אחד לכל הקונפיגורציה
+  // Legacy keys (for backward compatibility)
   MEDIA_BOARD_ID: 'media_board',
   MEDIA_BOARD_URL: 'media_board_url',
   MEDIA_BOARD_NAME_COL: 'media_board_name',

@@ -183,7 +183,7 @@ export const GuideProvider = ({ children }) => {
             return {
                 name: chapter.title,
                 index: chapterIndex,
-                fullName: `פרק ${chapterIndex + 1}: ${chapter.title}`
+                fullName: chapter.title
             };
         };
     }, [guideManagerValues.guideData]);

@@ -13,7 +13,7 @@ monday.setApiVersion("2023-10");
  */
 export const useGuideManager = () => {
   // Use the API hook for loading and saving data
-  const { fetchGuide, saveGuide: saveApi } = useMondayApi();
+  const { fetchGuide, saveGuide: saveApi, deleteItemFromMediaBoard } = useMondayApi();
 
   // Manage the core state of the application
   const [guideData, setGuideData] = useState(null);
@@ -110,7 +110,30 @@ export const useGuideManager = () => {
     setGuideData(prevData => guideService.updateChapter(prevData, chapterId, newData));
   };
 
-  const handleDeleteChapter = (chapterId) => {
+  const handleDeleteChapter = async (chapterId) => {
+    // מצא את כל בלוקי המדיה בכל הסעיפים בפרק
+    const chapter = guideData?.chapters?.find(ch => ch.id === chapterId);
+    
+    if (chapter?.sections) {
+      for (const section of chapter.sections) {
+        if (section.contentBlocks) {
+          for (const block of section.contentBlocks) {
+            const isMediaBlock = ['image', 'video', 'gif'].includes(block.type);
+            if (isMediaBlock && block.data?.mediaItemId) {
+              try {
+                console.log('🗑️ מוחק פריט מדיה מפרק:', block.data.mediaItemId);
+                await deleteItemFromMediaBoard(block.data.mediaItemId);
+              } catch (error) {
+                console.error('שגיאה במחיקת מדיה:', error);
+                // ממשיכים למחיקת הבלוק הבא
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // מחק את הפרק מהמדריך
     setGuideData(prevData => guideService.deleteChapter(prevData, chapterId));
   };
 
@@ -122,11 +145,52 @@ export const useGuideManager = () => {
     setGuideData(prevData => guideService.updateContentBlock(prevData, chapterId, sectionId, blockId, newData));
   };
 
-  const handleDeleteSection = (chapterId, sectionId) => {
+  const handleDeleteSection = async (chapterId, sectionId) => {
+    // מצא את כל בלוקי המדיה בסעיף
+    const chapter = guideData?.chapters?.find(ch => ch.id === chapterId);
+    const section = chapter?.sections?.find(sec => sec.id === sectionId);
+    
+    if (section?.contentBlocks) {
+      for (const block of section.contentBlocks) {
+        const isMediaBlock = ['image', 'video', 'gif'].includes(block.type);
+        if (isMediaBlock && block.data?.mediaItemId) {
+          try {
+            console.log('🗑️ מוחק פריט מדיה מסעיף:', block.data.mediaItemId);
+            await deleteItemFromMediaBoard(block.data.mediaItemId);
+          } catch (error) {
+            console.error('שגיאה במחיקת מדיה:', error);
+            // ממשיכים למחיקת הבלוק הבא
+          }
+        }
+      }
+    }
+
+    // מחק את הסעיף מהמדריך
     setGuideData(prevData => guideService.deleteSection(prevData, chapterId, sectionId));
   };
 
-  const handleDeleteContentBlock = (chapterId, sectionId, blockId) => {
+  const handleDeleteContentBlock = async (chapterId, sectionId, blockId) => {
+    // מצא את הבלוק לפני המחיקה
+    const chapter = guideData?.chapters?.find(ch => ch.id === chapterId);
+    const section = chapter?.sections?.find(sec => sec.id === sectionId);
+    const block = section?.contentBlocks?.find(b => b.id === blockId);
+
+    // בדוק אם זה בלוק מדיה שהועלה דרך המערכת
+    const isMediaBlock = ['image', 'video', 'gif'].includes(block?.type);
+    const hasMediaItemId = block?.data?.mediaItemId;
+
+    // אם יש mediaItemId - מחק מלוח המדיה
+    if (isMediaBlock && hasMediaItemId) {
+      try {
+        console.log('🗑️ מוחק פריט מדיה מלוח המדיה:', hasMediaItemId);
+        await deleteItemFromMediaBoard(hasMediaItemId);
+      } catch (error) {
+        console.error('שגיאה במחיקת פריט מלוח מדיה:', error);
+        // ממשיכים למחיקת הבלוק גם אם המחיקה מלוח המדיה נכשלה
+      }
+    }
+
+    // מחק את הבלוק מהמדריך
     setGuideData(prevData => guideService.deleteContentBlock(prevData, chapterId, sectionId, blockId));
   };
 

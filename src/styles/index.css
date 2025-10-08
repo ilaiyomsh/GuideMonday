@@ -10,24 +10,28 @@
 @import './base.css';
 
 /* 3. Layout Components */
+@import './navbar.css';
 @import './sidebar.css';
 @import './page-header.css';
 
-/* 4. Edit Controls */
+/* 4. Search */
+@import './search.css';
+
+/* 5. Edit Controls */
 @import './edit-forms.css';
 
-/* 5. Content Structure */
+/* 6. Content Structure */
 @import './sections.css';
 @import './blocks.css';
 
-/* 6. Modal Dialogs */
+/* 7. Modal Dialogs */
 @import './modal.css';
 
-/* 7. Text Editor */
+/* 8. Text Editor */
 @import './editor.css';
 
-/* 8. Setup Screen */
+/* 9. Setup Screen */
 @import './setup.css';
 
-/* 9. Responsive Design - Must be last */
+/* 10. Responsive Design - Must be last */
 @import './responsive.css';

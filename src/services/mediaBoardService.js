@@ -18,9 +18,9 @@ let initializationPromise = null;
  */
 export const checkMediaBoardExists = async () => {
   try {
-    const res = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_ID);
-    const boardId = res?.data?.value;
-    return !!boardId;
+    const res = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_CONFIG);
+    const config = res?.data?.value ? JSON.parse(res.data.value) : null;
+    return !!(config?.boardId);
   } catch (error) {
     console.error('Error checking media board existence:', error);
     return false;
@@ -158,17 +158,21 @@ export const getBoardUrl = async (boardId) => {
  */
 export const saveMediaBoardConfig = async (boardId, boardUrl, columnIds) => {
   try {
-    // שמירת מזהה הלוח ו-URL ב-storage גלובלי (לכל החשבון)
-    await monday.storage.setItem(STORAGE_KEYS.MEDIA_BOARD_ID, boardId);
-    await monday.storage.setItem(STORAGE_KEYS.MEDIA_BOARD_URL, boardUrl);
+    // שמירת כל הקונפיגורציה כאובייקט אחד - קריאה אחת במקום 8!
+    const config = {
+      boardId,
+      boardUrl,
+      columnIds: {
+        name: 'name', // עמודת שם ברירת מחדל
+        file: columnIds.file,
+        guide: columnIds.guide,
+        chapter: columnIds.chapter,
+        section: columnIds.section,
+        date: columnIds.date
+      }
+    };
     
-    // שמירת מזהי העמודות
-    await monday.storage.setItem(STORAGE_KEYS.MEDIA_BOARD_NAME_COL, 'name'); // עמודת שם ברירת מחדל
-    await monday.storage.setItem(STORAGE_KEYS.MEDIA_BOARD_GUIDE_COL, columnIds.guide);
-    await monday.storage.setItem(STORAGE_KEYS.MEDIA_BOARD_CHAPTER_COL, columnIds.chapter);
-    await monday.storage.setItem(STORAGE_KEYS.MEDIA_BOARD_SECTION_COL, columnIds.section);
-    await monday.storage.setItem(STORAGE_KEYS.MEDIA_BOARD_DATE_COL, columnIds.date);
-    await monday.storage.setItem(STORAGE_KEYS.MEDIA_BOARD_FILE_COL, columnIds.file);
+    await monday.storage.setItem(STORAGE_KEYS.MEDIA_BOARD_CONFIG, JSON.stringify(config));
     
     return true;
   } catch (error) {
@@ -197,15 +201,13 @@ export const initializeMediaBoard = async () => {
       // בדיקה ראשונה - האם כבר קיים?
       const exists = await checkMediaBoardExists();
       if (exists) {
-        const boardIdRes = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_ID);
-        const boardUrlRes = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_URL);
-        const boardId = boardIdRes?.data?.value;
-        const boardUrl = boardUrlRes?.data?.value;
+        const res = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_CONFIG);
+        const config = res?.data?.value ? JSON.parse(res.data.value) : null;
         
         return {
           success: true,
-          boardId,
-          boardUrl,
+          boardId: config?.boardId,
+          boardUrl: config?.boardUrl,
           message: 'לוח המדיה כבר קיים'
         };
       }
@@ -214,12 +216,12 @@ export const initializeMediaBoard = async () => {
       // 🔒 Double-Check - אולי תהליך מקביל כבר יצר?
       const doubleCheck = await checkMediaBoardExists();
       if (doubleCheck) {
-        const boardIdRes = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_ID);
-        const boardUrlRes = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_URL);
+        const res = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_CONFIG);
+        const config = res?.data?.value ? JSON.parse(res.data.value) : null;
         return {
           success: true,
-          boardId: boardIdRes?.data?.value,
-          boardUrl: boardUrlRes?.data?.value,
+          boardId: config?.boardId,
+          boardUrl: config?.boardUrl,
           message: 'לוח המדיה כבר קיים'
         };
       }
@@ -297,8 +299,9 @@ export const initializeMediaBoard = async () => {
  */
 export const getMediaBoardId = async () => {
   try {
-    const res = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_ID);
-    return res?.data?.value || null;
+    const res = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_CONFIG);
+    const config = res?.data?.value ? JSON.parse(res.data.value) : null;
+    return config?.boardId || null;
   } catch (error) {
     console.error('Error getting media board ID:', error);
     return null;
@@ -311,8 +314,9 @@ export const getMediaBoardId = async () => {
  */
 export const getMediaBoardUrlFromStorage = async () => {
   try {
-    const res = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_URL);
-    return res?.data?.value || null;
+    const res = await monday.storage.getItem(STORAGE_KEYS.MEDIA_BOARD_CONFIG);
+    const config = res?.data?.value ? JSON.parse(res.data.value) : null;
+    return config?.boardUrl || null;
   } catch (error) {
     console.error('Error getting media board URL:', error);
     return null;
@@ -405,6 +409,10 @@ export const checkMediaBoardValidity = async () => {
  */
 export const clearMediaBoardStorage = async () => {
   try {
+    // מחיקת הקונפיגורציה המאוחדת
+    await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_CONFIG);
+    
+    // מחיקת מפתחות ישנים (backward compatibility)
     await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_ID);
     await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_URL);
     await monday.storage.deleteItem(STORAGE_KEYS.MEDIA_BOARD_NAME_COL);

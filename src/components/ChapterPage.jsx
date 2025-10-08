@@ -9,7 +9,10 @@ export default function ChapterPage({ chapter, onNavigate }) {
   const [editingChapter, setEditingChapter] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
   const [chapterData, setChapterData] = useState({ title: '', content: '' });
-  const [sectionData, setSectionData] = useState({ title: '', content: '' });
+  const [sectionData, setSectionData] = useState({ title: '' });
+  const [lastSectionCount, setLastSectionCount] = useState(0);
+  const [sectionBlockCounts, setSectionBlockCounts] = useState({});
+  const [newBlockId, setNewBlockId] = useState(null);
 
   // Find chapter index for numbering
   const chapterIndex = guideData?.chapters?.findIndex(ch => ch.id === chapter?.id) ?? -1;
@@ -18,6 +21,44 @@ export default function ChapterPage({ chapter, onNavigate }) {
   useEffect(() => {
     setExpandedSections(new Set());
   }, [chapter?.id]);
+
+  // פתיחה אוטומטית של עריכה כאשר נוסף סעיף חדש
+  useEffect(() => {
+    if (chapter?.sections && chapter.sections.length > lastSectionCount && lastSectionCount > 0) {
+      // נוסף סעיף חדש - פתח אותו לעריכה
+      const newSection = chapter.sections[chapter.sections.length - 1];
+      setEditingSection(newSection.id);
+      setSectionData({ title: newSection.title });
+      // הרחב את הסעיף החדש
+      setExpandedSections(prev => new Set([...prev, newSection.id]));
+    }
+    setLastSectionCount(chapter?.sections?.length || 0);
+  }, [chapter?.sections?.length]);
+
+  // מעקב אחרי בלוקים חדשים בכל סעיף
+  useEffect(() => {
+    if (!chapter?.sections) return;
+    
+    const newCounts = {};
+    chapter.sections.forEach(section => {
+      const currentCount = section.contentBlocks?.length || 0;
+      const previousCount = sectionBlockCounts[section.id] || 0;
+      
+      if (currentCount > previousCount) {
+        // נוסף בלוק חדש לסעיף זה (כולל הבלוק הראשון)
+        const newBlock = section.contentBlocks[section.contentBlocks.length - 1];
+        setNewBlockId(newBlock.id);
+        // הרחב את הסעיף אם הוא לא מורחב
+        setExpandedSections(prev => new Set([...prev, section.id]));
+        // נקה את המזהה החדש אחרי רגע
+        setTimeout(() => setNewBlockId(null), 100);
+      }
+      
+      newCounts[section.id] = currentCount;
+    });
+    
+    setSectionBlockCounts(newCounts);
+  }, [chapter?.sections]);
 
   const toggleSectionExpansion = (sectionId) => {
     const newExpanded = new Set(expandedSections);
@@ -51,19 +92,19 @@ export default function ChapterPage({ chapter, onNavigate }) {
   const handleEditSection = (section) => {
     setEditingSection(section.id);
     setSectionData({
-      title: section.title,
-      content: section.content || ''
+      title: section.title
     });
   };
 
   const handleSaveSection = () => {
-    handleUpdateSection(chapter.id, editingSection, sectionData);
+    // רק שמירת title, בלי content
+    handleUpdateSection(chapter.id, editingSection, { title: sectionData.title });
     setEditingSection(null);
   };
 
   const handleCancelSectionEdit = () => {
     setEditingSection(null);
-    setSectionData({ title: '', content: '' });
+    setSectionData({ title: '' });
   };
 
   if (!chapter) {
@@ -100,15 +141,15 @@ export default function ChapterPage({ chapter, onNavigate }) {
           </div>
         ) : (
           <div className="page-header-content">
+            {isEditMode && (
+              <button className="chapter-edit-button" onClick={handleEditChapter} title="ערוך פרק">
+                <Edit />
+              </button>
+            )}
             <div className="header-text">
-          <h1>{chapter.title}</h1>
+              <h1>{chapter.title}</h1>
               {chapter.content && (
                 <p className="chapter-content">{chapter.content}</p>
-              )}
-              {isEditMode && (
-                <button className="edit-content-button" onClick={handleEditChapter} title="ערוך">
-                  <Edit />
-                </button>
               )}
             </div>
           </div>
@@ -126,16 +167,10 @@ export default function ChapterPage({ chapter, onNavigate }) {
                   <input
                     type="text"
                     value={sectionData.title}
-                    onChange={(e) => setSectionData({...sectionData, title: e.target.value})}
+                    onChange={(e) => setSectionData({ title: e.target.value })}
                     className="edit-input title-input"
                     placeholder="כותרת הסעיף"
-                  />
-                  <textarea
-                    value={sectionData.content}
-                    onChange={(e) => setSectionData({...sectionData, content: e.target.value})}
-                    className="edit-textarea"
-                    placeholder="תוכן הסעיף"
-                    rows="2"
+                    autoFocus
                   />
                   <div className="edit-actions">
                     <button className="save-edit-button" onClick={handleSaveSection}>
@@ -166,7 +201,7 @@ export default function ChapterPage({ chapter, onNavigate }) {
                     className="section-toggle-button"
                     onClick={() => toggleSectionExpansion(section.id)}
                   >
-                    <span>{chapterIndex + 1}.{index + 1} {section.title}</span>
+                    <span>{section.title}</span>
                     <svg className="accordion-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
                     </svg>
@@ -224,22 +259,18 @@ export default function ChapterPage({ chapter, onNavigate }) {
               
               {/* Section Content and Content Blocks - Only visible when expanded */}
               <div className={`accordion-content ${isExpanded ? 'open' : ''}`}>
-                {section.content && (
-                  <div className="section-content">
-                    <p>{section.content}</p>
-                  </div>
-                )}
                 {section.contentBlocks && section.contentBlocks.map((block, blockIndex) => (
                   <ContentBlock 
                     key={block.id} 
                     block={block} 
                     isEditMode={isEditMode}
-            chapterId={chapter.id}
+                    chapterId={chapter.id}
                     sectionId={section.id}
                     blockIndex={blockIndex}
                     totalBlocks={section.contentBlocks.length}
-          />
-        ))}
+                    isNewBlock={block.id === newBlockId}
+                  />
+                ))}
                 
                 {isEditMode && (
                   <div className="add-controls-container">

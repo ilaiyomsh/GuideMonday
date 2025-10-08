@@ -125,15 +125,19 @@ export default function ContentBlockEditDialog({
       console.log('🚀 מעלה קובץ עם context:', context);
 
       // העלאה ללוח המדיה עם context מלא
-      const url = await uploadFileToMediaBoard(file, context);
+      const result = await uploadFileToMediaBoard(file, context);
       
-      // Update form data with the uploaded URL
-      setFormData(prev => ({ ...prev, url: url }));
+      // Update form data with the uploaded URL and itemId
+      setFormData(prev => ({ 
+        ...prev, 
+        url: result.url,
+        mediaItemId: result.itemId  // שמירת מזהה האייטם למחיקה עתידית
+      }));
       
       // Clear any previous file errors
       setErrors(prev => ({ ...prev, file: null }));
       
-      console.log('✅ קובץ הועלה בהצלחה:', url);
+      console.log('✅ קובץ הועלה בהצלחה:', result.url, 'Item ID:', result.itemId);
       
     } catch (error) {
       console.error('❌ שגיאה בהעלאת הקובץ:', error);
@@ -157,7 +161,7 @@ export default function ContentBlockEditDialog({
     
     switch (block?.type) {
       case 'text':
-        if (!formData.text?.trim()) {
+        if (!formData.content?.trim()) {
           newErrors.text = 'טקסט נדרש';
         }
         break;

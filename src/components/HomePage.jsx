@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useGuide } from '../context/GuideContext';
-import { Edit } from '@vibe/icons';
+import { Edit, Add, MoveArrowUp, MoveArrowDown, Delete } from '@vibe/icons';
 
 export default function HomePage({ onNavigate }) {
-  const { guideData, isEditMode, handleUpdateHomePage } = useGuide();
+  const { guideData, isEditMode, handleUpdateHomePage, handleAddChapter, handleReorderChapter, handleDeleteChapter, handleUpdateChapter } = useGuide();
   const [isEditingHomePage, setIsEditingHomePage] = useState(false);
   const [homePageData, setHomePageData] = useState({
     title: guideData?.homePage?.title || 'ברוכים הבאים',
     content: guideData?.homePage?.content || ''
   });
+  const [editingChapter, setEditingChapter] = useState(null);
+  const [chapterData, setChapterData] = useState({ title: '', content: '' });
 
   if (!guideData) return <div>Loading home page...</div>;
 
@@ -36,6 +38,44 @@ export default function HomePage({ onNavigate }) {
       title: guideData.homePage?.title || 'ברוכים הבאים',
       content: guideData.homePage?.content || ''
     });
+  };
+
+  const handleAddNewChapter = () => {
+    handleAddChapter();
+  };
+
+  const handleReorderChapterClick = (chapterIndex, direction, e) => {
+    e.stopPropagation();
+    handleReorderChapter(chapterIndex, direction);
+  };
+
+  const handleDeleteChapterClick = (chapterId, e) => {
+    e.stopPropagation();
+    if (window.confirm('האם אתם בטוחים שברצונכם למחוק את הפרק?')) {
+      handleDeleteChapter(chapterId);
+    }
+  };
+
+  const handleEditChapter = (chapter, e) => {
+    e.stopPropagation();
+    setEditingChapter(chapter.id);
+    setChapterData({
+      title: chapter.title,
+      content: chapter.content || ''
+    });
+  };
+
+  const handleSaveChapter = () => {
+    if (editingChapter) {
+      handleUpdateChapter(editingChapter, chapterData);
+      setEditingChapter(null);
+      setChapterData({ title: '', content: '' });
+    }
+  };
+
+  const handleCancelChapterEdit = () => {
+    setEditingChapter(null);
+    setChapterData({ title: '', content: '' });
   };
 
   return (
@@ -68,15 +108,15 @@ export default function HomePage({ onNavigate }) {
           </div>
         ) : (
           <div className="page-header-content">
+            {isEditMode && (
+              <button className="home-edit-button" onClick={handleEditHomePage} title="ערוך כותרת ותיאור">
+                <Edit />
+              </button>
+            )}
             <div className="header-text">
               <h1>{guideData.homePage?.title || 'ברוכים הבאים'}</h1>
               {guideData.homePage?.content && (
                 <p className="home-content">{guideData.homePage.content}</p>
-              )}
-              {isEditMode && (
-                <button className="edit-content-button" onClick={handleEditHomePage} title="ערוך">
-                  <Edit />
-                </button>
               )}
             </div>
           </div>
@@ -90,10 +130,82 @@ export default function HomePage({ onNavigate }) {
             className="chapter-card"
             onClick={() => handleChapterClick(chapter.id)}
           >
-            <h2>{index + 1}. {chapter.title}</h2>
-            <p>{chapter.description || chapter.content || 'תיאור הפרק יופיע כאן'}</p>
+            {editingChapter === chapter.id ? (
+              <div 
+                className="chapter-edit-form"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <input
+                  type="text"
+                  value={chapterData.title}
+                  onChange={(e) => setChapterData({ ...chapterData, title: e.target.value })}
+                  className="edit-input title-input"
+                  placeholder="כותרת הפרק"
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <textarea
+                  value={chapterData.content}
+                  onChange={(e) => setChapterData({ ...chapterData, content: e.target.value })}
+                  className="edit-input content-input"
+                  placeholder="תיאור הפרק"
+                  rows="3"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <div className="edit-buttons">
+                  <button 
+                    className="save-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSaveChapter();
+                    }}
+                  >
+                    שמור
+                  </button>
+                  <button 
+                    className="cancel-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCancelChapterEdit();
+                    }}
+                  >
+                    ביטול
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {isEditMode && (
+                  <button 
+                    className="chapter-edit-button"
+                    onClick={(e) => handleEditChapter(chapter, e)}
+                    title="ערוך פרק"
+                  >
+                    <Edit />
+                  </button>
+                )}
+                <h2>{chapter.title}</h2>
+                <p>{chapter.description || chapter.content || 'תיאור הפרק יופיע כאן'}</p>
+              </>
+            )}
           </div>
         ))}
+        
+        {/* כפתור הוספת פרק חדש - רק במצב עריכה */}
+        {isEditMode && (
+          <div 
+            className="chapter-card add-chapter-card"
+            onClick={handleAddNewChapter}
+          >
+            <div className="add-chapter-content">
+              <div className="add-chapter-icon">
+                <Add />
+              </div>
+              <h2>הוסף פרק חדש</h2>
+              <p>לחץ כאן כדי ליצור פרק חדש במדריך</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

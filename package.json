@@ -29,6 +29,7 @@
     "classnames": "^2.5.1",
     "dompurify": "^3.2.7",
     "draft-js": "^0.11.7",
+    "fuse.js": "^7.0.0",
     "monday-sdk-js": "^0.5.5",
     "serve": "^14.2.3"
   },

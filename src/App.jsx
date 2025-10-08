@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGuide } from './context/GuideContext.jsx';
 
-import Sidebar from './components/Sidebar';
+import NavBar from './components/NavBar';
 import HomePage from './components/HomePage';
 import ChapterPage from './components/ChapterPage';
 import GuideSetup from './components/GuideSetup';
@@ -52,14 +52,12 @@ export default function App() {
   }
 
   return (
-    <div className={`App ${isEditMode ? 'edit-mode-active' : ''}`}>
-      <aside className="sidebar">
-        <Sidebar 
-          currentPage={currentPage}
-          currentChapterId={currentChapterId}
-          onNavigate={handleNavigate}
-        />
-      </aside>
+    <div className={`App app-with-navbar ${isEditMode ? 'edit-mode-active' : ''}`}>
+      <NavBar 
+        currentPage={currentPage}
+        currentChapterId={currentChapterId}
+        onNavigate={handleNavigate}
+      />
       
       <main className="main-content">
         <div id="home-page" className={`page-view ${currentPage === 'home-page' ? '' : 'hidden'}`}>

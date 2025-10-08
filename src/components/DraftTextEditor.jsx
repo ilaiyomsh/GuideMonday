@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Editor, EditorState, RichUtils, convertFromHTML, ContentState } from 'draft-js';
-import { Numbers, Bullets } from '@vibe/icons';
+import { Numbers, Bullets, AlignLeft, AlignCenter, AlignRight, Text, TextBig, TextHuge } from '@vibe/icons';
 import 'draft-js/dist/Draft.css';
 
 const DraftTextEditor = ({ initialContent = '', onChange, direction = 'rtl' }) => {
@@ -38,29 +38,32 @@ const DraftTextEditor = ({ initialContent = '', onChange, direction = 'rtl' }) =
     blocks.forEach((block) => {
       const text = block.getText();
       const blockType = block.getType();
+      const textAlign = block.getData().get('textAlign');
       
       if (text.trim()) {
+        const alignStyle = textAlign ? `text-align: ${textAlign};` : '';
+        
         switch (blockType) {
           case 'header-one':
-            html += `<h1>${text}</h1>`;
+            html += `<p style="${alignStyle}font-size: 20px; font-weight: 600; line-height: 1.4;">${text}</p>`;
             break;
           case 'header-two':
-            html += `<h2>${text}</h2>`;
+            html += `<p style="${alignStyle}font-size: 16px; font-weight: 600; line-height: 1.4;">${text}</p>`;
             break;
           case 'header-three':
-            html += `<h3>${text}</h3>`;
+            html += `<p style="${alignStyle}font-size: 14px; font-weight: 600; line-height: 1.4;">${text}</p>`;
             break;
           case 'unordered-list-item':
-            html += `<ul><li>${text}</li></ul>`;
+            html += `<ul style="${alignStyle}"><li>${text}</li></ul>`;
             break;
           case 'ordered-list-item':
-            html += `<ol><li>${text}</li></ol>`;
+            html += `<ol style="${alignStyle}"><li>${text}</li></ol>`;
             break;
           case 'blockquote':
-            html += `<blockquote>${text}</blockquote>`;
+            html += `<blockquote style="${alignStyle}">${text}</blockquote>`;
             break;
           default:
-            html += `<p>${text}</p>`;
+            html += `<p style="${alignStyle}">${text}</p>`;
         }
       }
     });
@@ -101,6 +104,31 @@ const DraftTextEditor = ({ initialContent = '', onChange, direction = 'rtl' }) =
 
   const onHeaderClick = (headerType) => {
     handleEditorChange(RichUtils.toggleBlockType(editorState, headerType));
+  };
+
+  const getCurrentTextAlign = () => {
+    const selection = editorState.getSelection();
+    const contentState = editorState.getCurrentContent();
+    const blockKey = selection.getStartKey();
+    const block = contentState.getBlockForKey(blockKey);
+    return block.getData().get('textAlign') || 'right'; // ברירת מחדל יישור לימין
+  };
+
+  const onTextAlignClick = (align) => {
+    const selection = editorState.getSelection();
+    const contentState = editorState.getCurrentContent();
+    const blockKey = selection.getStartKey();
+    const block = contentState.getBlockForKey(blockKey);
+    
+    // Create new block data with text alignment
+    const newBlockData = block.getData().set('textAlign', align);
+    const newContentState = contentState.mergeBlockData(blockKey, newBlockData);
+    const newEditorState = EditorState.forceSelection(
+      EditorState.createWithContent(newContentState),
+      selection
+    );
+    
+    handleEditorChange(newEditorState);
   };
 
   // Focus editor when component mounts
@@ -165,29 +193,58 @@ const DraftTextEditor = ({ initialContent = '', onChange, direction = 'rtl' }) =
         
         <button
           type="button"
+          className={`toolbar-button ${getCurrentTextAlign() === 'right' ? 'active' : ''}`}
+          onClick={() => onTextAlignClick('right')}
+          title="יישור לימין"
+        >
+          <AlignRight />
+        </button>
+        
+        <button
+          type="button"
+          className={`toolbar-button ${getCurrentTextAlign() === 'center' ? 'active' : ''}`}
+          onClick={() => onTextAlignClick('center')}
+          title="יישור למרכז"
+        >
+          <AlignCenter />
+        </button>
+        
+        <button
+          type="button"
+          className={`toolbar-button ${getCurrentTextAlign() === 'left' ? 'active' : ''}`}
+          onClick={() => onTextAlignClick('left')}
+          title="יישור לשמאל"
+        >
+          <AlignLeft />
+        </button>
+        
+        <div className="toolbar-separator" />
+        
+        <button
+          type="button"
           className={`toolbar-button ${editorState.getCurrentContent().getBlockForKey(editorState.getSelection().getStartKey()).getType() === 'header-one' ? 'active' : ''}`}
           onClick={() => onHeaderClick('header-one')}
-          title="כותרת 1"
+          title="כותרת גדולה"
         >
-          H1
+          <TextHuge />
         </button>
         
         <button
           type="button"
           className={`toolbar-button ${editorState.getCurrentContent().getBlockForKey(editorState.getSelection().getStartKey()).getType() === 'header-two' ? 'active' : ''}`}
           onClick={() => onHeaderClick('header-two')}
-          title="כותרת 2"
+          title="כותרת בינונית"
         >
-          H2
+          <TextBig />
         </button>
         
         <button
           type="button"
           className={`toolbar-button ${editorState.getCurrentContent().getBlockForKey(editorState.getSelection().getStartKey()).getType() === 'header-three' ? 'active' : ''}`}
           onClick={() => onHeaderClick('header-three')}
-          title="כותרת 3"
+          title="כותרת קטנה"
         >
-          H3
+          <Text />
         </button>
       </div>
       

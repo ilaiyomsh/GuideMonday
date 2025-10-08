@@ -3,10 +3,14 @@
   position: relative;
   margin-bottom: var(--spacing-large);
   clear: both;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .sections-container {
   position: relative;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .section-accordion-toggle {
@@ -15,6 +19,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  max-width: 100%;
   font-size: 1.5rem;
   color: var(--primary-text-color);
   padding: var(--spacing-medium) 0;
@@ -25,6 +30,7 @@
   text-align: right;
   cursor: pointer;
   border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
 }
 
 .section-toggle-button {
@@ -61,7 +67,7 @@
   display: none;
   position: absolute;
   top: 8px;
-  right: 8px;
+  left: 8px;
   background-color: white;
   border-radius: var(--border-radius-medium);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -127,11 +133,14 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.4s ease-in-out;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .section .accordion-content.open { 
-  max-height: 5000px; 
-  overflow: visible;
+  max-height: 5000px;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 /* Add Item Buttons */

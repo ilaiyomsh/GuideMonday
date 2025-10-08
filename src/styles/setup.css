@@ -1,7 +1,7 @@
 /* Guide Setup Screen Styles */
 .guide-setup {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,14 +12,14 @@
   background: white;
   border-radius: var(--border-radius-large);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  max-width: 800px;
+  max-width: 900px;
   width: 100%;
   overflow: hidden;
 }
 
 .setup-header {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-  color: white;
+  background: white;
+  color: var(--primary-text-color);
   padding: var(--spacing-xlarge);
   text-align: center;
 }
@@ -28,12 +28,13 @@
   margin: 0 0 var(--spacing-medium) 0;
   font-size: 2.5rem;
   font-weight: 700;
+  color: var(--primary-text-color);
 }
 
 .setup-header p {
   margin: 0;
   font-size: 1.1rem;
-  opacity: 0.9;
+  color: var(--secondary-text-color);
 }
 
 .setup-content {
@@ -70,36 +71,31 @@
 
 .options-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-large);
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-large) var(--spacing-xlarge);
   margin-bottom: var(--spacing-xlarge);
+  width: 100%;
+  align-items: stretch;
 }
 
 .option-card {
-  background: var(--background-color);
+  background: white;
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius-large);
-  padding: var(--spacing-large);
+  padding: var(--spacing-xlarge);
   text-align: center;
   transition: all 0.3s ease;
   position: relative;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  height: 80%;
 }
 
 .option-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   border-color: var(--primary-color);
-}
-
-.option-card.primary {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-  color: white;
-  border-color: var(--primary-dark);
-}
-
-.option-card.primary:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 30px rgba(var(--primary-color-rgb), 0.3);
 }
 
 .option-icon {
@@ -111,16 +107,14 @@
   margin: 0 0 var(--spacing-small) 0;
   font-size: 1.3rem;
   font-weight: 600;
+  color: var(--primary-text-color);
 }
 
 .option-card p {
   margin: 0 0 var(--spacing-large) 0;
   color: var(--secondary-text-color);
   line-height: 1.5;
-}
-
-.option-card.primary p {
-  color: rgba(255, 255, 255, 0.9);
+  flex-grow: 1;
 }
 
 .option-button {
@@ -133,11 +127,11 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
+  margin-top: auto;
 }
 
 .option-button:hover:not(:disabled) {
-  background: var(--primary-dark);
   transform: translateY(-2px);
 }
 
@@ -145,22 +139,6 @@
   background: var(--secondary-text-color);
   cursor: not-allowed;
   transform: none;
-}
-
-.option-button.secondary {
-  background: var(--secondary-color);
-  color: var(--primary-text-color);
-}
-
-.option-button.primary {
-  background: white;
-  color: var(--primary-color);
-  border: 2px solid white;
-}
-
-.option-button.primary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.9);
-  transform: translateY(-2px);
 }
 
 .error-message {
@@ -201,4 +179,58 @@
 
 .setup-help li {
   margin-bottom: var(--spacing-small);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .setup-header h1 {
+    font-size: 2rem;
+  }
+  
+  .setup-header p {
+    font-size: 1rem;
+  }
+  
+  .options-section {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-medium);
+  }
+  
+  .option-card {
+    padding: var(--spacing-medium);
+  }
+  
+  .option-card.primary {
+    padding: var(--spacing-large);
+  }
+  
+  .option-icon {
+    font-size: 2.5rem;
+  }
+  
+  .option-card h3 {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .guide-setup {
+    padding: var(--spacing-small);
+  }
+  
+  .setup-header {
+    padding: var(--spacing-large);
+  }
+  
+  .setup-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .setup-content {
+    padding: var(--spacing-medium);
+  }
+  
+  .option-card {
+    padding: var(--spacing-small) var(--spacing-medium);
+  }
 }

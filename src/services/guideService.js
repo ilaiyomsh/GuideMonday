@@ -44,7 +44,7 @@ export const addChapter = (guideData) => {
   const chapterNumber = (guideData?.chapters?.length || 0) + 1;
   const newChapter = {
     id: generateId('chap'),
-    title: `פרק ${chapterNumber}: פרק חדש`,
+    title: 'פרק חדש',
     content: 'תיאור הפרק יופיע כאן.',
     sections: []
   };
@@ -108,15 +108,9 @@ export const deleteSection = (guideData, chapterId, sectionId) => {
  * Add a new section to a chapter
  */
 export const addSection = (guideData, chapterId) => {
-  const chapter = guideData?.chapters?.find(ch => ch.id === chapterId);
-  const sectionNumber = (chapter?.sections?.length || 0) + 1;
-  const chapterIndex = guideData?.chapters?.findIndex(ch => ch.id === chapterId) ?? 0;
-  const chapterNumber = chapterIndex + 1;
-  
   const newSection = {
     id: generateId('sec'),
-    title: `${chapterNumber}.${sectionNumber} סעיף חדש`,
-    content: 'תיאור הסעיף יופיע כאן.',
+    title: 'סעיף חדש',
     contentBlocks: []
   };
   
@@ -202,10 +196,10 @@ export const deleteContentBlock = (guideData, chapterId, sectionId, blockId) => 
  */
 export const addContentBlock = (guideData, chapterId, sectionId, blockType = 'text') => {
   const blockData = {
-    text: { text: 'New text content goes here.' },
-    image: { url: 'https://placehold.co/600x300/e9ecef/6c757d?text=New+Image', caption: 'Image caption' },
-    video: { embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', description: 'Video description' },
-    link: { url: 'https://example.com', displayText: 'New Link' },
+    text: { text: '' }, // בלוק ריק
+    image: { url: '', caption: '' }, // בלוק ריק
+    video: { embedUrl: '', description: '' }, // בלוק ריק
+    link: { url: '', displayText: '' }, // בלוק ריק
   };
   
   const newBlock = {

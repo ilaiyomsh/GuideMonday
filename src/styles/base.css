@@ -22,17 +22,32 @@ body {
   background-color: var(--surface-color);
 }
 
+/* Layout עם NavBar עליון */
+.app-with-navbar {
+  display: flex;
+  flex-direction: column;
+}
+
 .page-view.hidden {
   display: none;
 }
 
 .main-content {
   flex-grow: 1;
-  padding: var(--spacing-xlarge) 60px;
+  padding: var(--spacing-xlarge) var(--spacing-large);
   overflow-y: auto;
+  overflow-x: hidden;
   background-color: var(--surface-color);
-  max-width: 2000px;
+  max-width: 1400px;
   margin: 0 auto;
+  width: 75%;
+  box-sizing: border-box;
+}
+
+/* עבור Layout עם NavBar */
+.app-with-navbar .main-content {
+  max-width: 100%;
+  padding: var(--spacing-xlarge) var(--spacing-xlarge);
 }
 
 .loading-container {

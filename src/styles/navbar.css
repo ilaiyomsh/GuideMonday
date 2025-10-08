@@ -1,0 +1,264 @@
+/* Top Navigation Bar */
+.top-navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background-color: var(--neutral-background-color);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-large);
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* אזור מרכזי - חיפוש וניווט */
+.navbar-center {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-large);
+  flex-grow: 1;
+  justify-content: flex-start;
+  margin-right: auto;
+}
+
+/* כפתורי ניווט */
+.navbar-navigation {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-small);
+}
+
+.navbar-nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: none;
+  border-radius: var(--border-radius-medium);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: var(--primary-text-color);
+}
+
+.navbar-nav-button:hover:not(:disabled) {
+  background-color: rgba(0, 115, 234, 0.1);
+}
+
+.navbar-nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.navbar-nav-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* אזור פעולות */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-medium);
+}
+
+/* מצב עריכה */
+.navbar-edit-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-small);
+}
+
+.navbar-edit-toggle span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--secondary-text-color);
+}
+
+/* Toggle Switch - מעובר מ-Sidebar */
+.navbar-edit-toggle .toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.navbar-edit-toggle .toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.navbar-edit-toggle .toggle-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.navbar-edit-toggle .toggle-switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.navbar-edit-toggle .toggle-switch input:checked + .slider {
+  background-color: var(--primary-color);
+}
+
+.navbar-edit-toggle .toggle-switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* פעולות עריכה */
+.navbar-edit-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-small);
+}
+
+.navbar-save-button,
+.navbar-media-button,
+.navbar-download-button,
+.navbar-upload-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-small);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-medium);
+  transition: all 0.2s;
+}
+
+.navbar-save-button:hover,
+.navbar-media-button:hover,
+.navbar-download-button:hover,
+.navbar-upload-button:hover {
+  background-color: var(--neutral-background-color);
+}
+
+.navbar-save-button svg,
+.navbar-media-button svg,
+.navbar-download-button svg,
+.navbar-upload-button svg {
+  width: 19px;
+  height: 19px;
+  color: var(--secondary-text-color);
+}
+
+.navbar-save-button:hover svg,
+.navbar-media-button:hover svg,
+.navbar-download-button:hover svg,
+.navbar-upload-button:hover svg {
+  color: var(--primary-color);
+}
+
+/* Tooltip styles */
+.navbar-save-button,
+.navbar-media-button,
+.navbar-download-button,
+.navbar-upload-button {
+  position: relative;
+}
+
+.navbar-save-button:hover::after,
+.navbar-media-button:hover::after,
+.navbar-download-button:hover::after,
+.navbar-upload-button:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--primary-text-color);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-small);
+  border-radius: var(--border-radius-small);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-save-button:hover::before,
+.navbar-media-button:hover::before,
+.navbar-download-button:hover::before,
+.navbar-upload-button:hover::before {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-bottom-color: var(--primary-text-color);
+  z-index: 1000;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .top-navbar {
+    padding: 0 var(--spacing-medium);
+    height: 56px;
+  }
+  
+  .navbar-title h1 {
+    font-size: 1rem;
+    max-width: 200px;
+  }
+  
+  .navbar-nav-button {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .navbar-edit-toggle span {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-navbar {
+    padding: 0 var(--spacing-small);
+    height: 52px;
+  }
+  
+  .navbar-title h1 {
+    font-size: 0.9rem;
+    max-width: 150px;
+  }
+  
+  .navbar-nav-button {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .navbar-save-button,
+  .navbar-media-button {
+    padding: var(--spacing-xs) var(--spacing-small);
+    font-size: 0.85rem;
+  }
+  
+  .navbar-media-button {
+    font-size: 1.2rem;
+    padding: var(--spacing-xs);
+  }
+}
+

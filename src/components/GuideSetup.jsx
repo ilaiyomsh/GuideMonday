@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { DEFAULT_GUIDE_TEMPLATE } from '../defaultGuideTemplate';
+import { BLANK_GUIDE_TEMPLATE } from '../blankGuideTemplate';
+import { GUIDE_STRUCTURE_EXAMPLE } from '../guideStructureExample';
 import { useGuide } from '../context/GuideContext';
 
 export default function GuideSetup({ onGuideLoad }) {
@@ -51,6 +53,25 @@ export default function GuideSetup({ onGuideLoad }) {
     reader.readAsText(file);
   };
 
+  const handleLoadBlank = () => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const blankGuide = { ...BLANK_GUIDE_TEMPLATE };
+      
+      // Add guide name if provided
+      if (guideName.trim()) {
+        blankGuide.guideName = guideName.trim();
+      }
+
+      onGuideLoad(blankGuide);
+    } catch (error) {
+      setError(`שגיאה בטעינת המדריך הריק: ${error.message}`);
+      setIsLoading(false);
+    }
+  };
+
   const handleLoadDefault = () => {
     setIsLoading(true);
     setError('');
@@ -70,26 +91,21 @@ export default function GuideSetup({ onGuideLoad }) {
     }
   };
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadStructureExample = () => {
     try {
-      const templateData = { ...DEFAULT_GUIDE_TEMPLATE };
-      if (guideName.trim()) {
-        templateData.guideName = guideName.trim();
-      }
+      const structureData = { ...GUIDE_STRUCTURE_EXAMPLE };
 
-      const dataStr = JSON.stringify(templateData, null, 2);
+      const dataStr = JSON.stringify(structureData, null, 2);
       const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
       
-      const exportFileDefaultName = guideName.trim() ? 
-        `guide_${guideName.trim().replace(/\s+/g, '_')}.json` : 
-        'guide_template.json';
+      const exportFileDefaultName = 'guide_structure_example_for_ai.json';
 
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);
       linkElement.setAttribute('download', exportFileDefaultName);
       linkElement.click();
     } catch (error) {
-      setError(`שגיאה בהורדת התבנית: ${error.message}`);
+      setError(`שגיאה בהורדת מבנה הדוגמה: ${error.message}`);
     }
   };
 
@@ -101,37 +117,41 @@ export default function GuideSetup({ onGuideLoad }) {
     <div className="guide-setup">
       <div className="setup-container">
         <div className="setup-header">
-          <h1>🎯 מדריך אינטראקטיבי חדש</h1>
+          <h1>מדריך  חדש</h1>
           <p>ברוכים הבאים! בחרו איך להתחיל את המדריך שלכם</p>
           
-          {/* הצגת סטטוס לוח המדיה מה-Context */}
+          {/* הצגת סטטוס לוח המדיה מה-Context - רק אם יש בעיה */}
           {mediaBoardState.isInitializing && (
             <div style={{ 
               marginTop: '1rem', 
               padding: '0.75rem', 
-              background: 'rgba(255,255,255,0.2)',
+              background: 'rgba(255,255,255,0.15)',
               borderRadius: '8px',
-              fontSize: '0.9rem'
+              fontSize: '0.85rem',
+              color: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(255,255,255,0.2)'
             }}>
-              {mediaBoardState.message}
+              ⏳ {mediaBoardState.message}
             </div>
           )}
-          {!mediaBoardState.isInitializing && (
+          {!mediaBoardState.isInitializing && !mediaBoardState.isReady && (
             <div style={{ 
               marginTop: '1rem', 
               padding: '0.75rem', 
-              background: mediaBoardState.isReady ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 193, 7, 0.2)',
+              background: 'rgba(255, 193, 7, 0.2)',
               borderRadius: '8px',
-              fontSize: '0.9rem'
+              fontSize: '0.85rem',
+              color: 'rgba(255,255,255,0.95)',
+              border: '1px solid rgba(255,255,255,0.3)'
             }}>
-              {mediaBoardState.message}
+              ⚠️ {mediaBoardState.message}
             </div>
           )}
         </div>
 
         <div className="setup-content">
           <div className="form-section">
-            <label htmlFor="guideName">שם המדריך (אופציונלי)</label>
+            <label htmlFor="guideName">שם המדריך </label>
             <input
               id="guideName"
               type="text"
@@ -143,6 +163,45 @@ export default function GuideSetup({ onGuideLoad }) {
           </div>
 
           <div className="options-section">
+            <div className="option-card">
+              <div className="option-icon">📄</div>
+              <h3>התחל עם מדריך ריק</h3>
+              <p>צרו מדריך חדש ממש מאפס</p>
+              <button 
+                onClick={handleLoadBlank}
+                disabled={isLoading || mediaBoardState.isInitializing}
+                className="option-button"
+              >
+                {isLoading ? 'טוען...' : mediaBoardState.isInitializing ? 'מכין תשתית...' : 'התחל עכשיו'}
+              </button>
+            </div>
+
+            <div className="option-card">
+              <div className="option-icon">🚀</div>
+              <h3>התחל עם מדריך ברירת מחדל</h3>
+              <p>התחילו עם מדריך דוגמה מלא ומוכן לעריכה</p>
+              <button 
+                onClick={handleLoadDefault}
+                disabled={isLoading || mediaBoardState.isInitializing}
+                className="option-button"
+              >
+                {isLoading ? 'טוען...' : mediaBoardState.isInitializing ? 'מכין תשתית...' : 'התחל עם דוגמה'}
+              </button>
+            </div>
+
+            <div className="option-card">
+              <div className="option-icon">🤖</div>
+              <h3>הורד מבנה עבור AI</h3>
+              <p>הורידו קובץ JSON עם הסבר מפורט למבנה המדריך עבור מודל בינה מלאכותית</p>
+              <button 
+                onClick={handleDownloadStructureExample}
+                disabled={isLoading || mediaBoardState.isInitializing}
+                className="option-button"
+              >
+                הורד מבנה
+              </button>
+            </div>
+
             <div className="option-card">
               <div className="option-icon">📁</div>
               <h3>טען מדריך קיים</h3>
@@ -162,32 +221,6 @@ export default function GuideSetup({ onGuideLoad }) {
                 style={{ display: 'none' }}
               />
             </div>
-
-            <div className="option-card">
-              <div className="option-icon">📋</div>
-              <h3>הורד תבנית לדוגמה</h3>
-              <p>הורידו קובץ JSON עם דוגמה למדריך מלא</p>
-              <button 
-                onClick={handleDownloadTemplate}
-                disabled={isLoading || mediaBoardState.isInitializing}
-                className="option-button secondary"
-              >
-                הורד תבנית
-              </button>
-            </div>
-
-            <div className="option-card primary">
-              <div className="option-icon">🚀</div>
-              <h3>התחל עם מדריך ברירת מחדל</h3>
-              <p>התחילו עם מדריך דוגמה מלא ומוכן לעריכה</p>
-              <button 
-                onClick={handleLoadDefault}
-                disabled={isLoading || mediaBoardState.isInitializing}
-                className="option-button primary"
-              >
-                {isLoading ? 'טוען...' : mediaBoardState.isInitializing ? 'מכין תשתית...' : 'התחל עכשיו'}
-              </button>
-            </div>
           </div>
 
           {error && (
@@ -200,10 +233,11 @@ export default function GuideSetup({ onGuideLoad }) {
           <div className="setup-help">
             <h4>💡 טיפים:</h4>
             <ul>
-              <li>אם יש לכם קובץ JSON של מדריך, העלו אותו</li>
-              <li>אם אתם מתחילים, הורידו את התבנית או התחילו עם ברירת המחדל</li>
-              <li>שם המדריך יופיע בכותרת העליונה</li>
-              <li>תמיד תוכלו לערוך את המדריך לאחר הטעינה</li>
+              <li><strong>מדריך ריק</strong> - מתאים למי שרוצה לבנות מדריך מאפס בעצמו</li>
+              <li><strong>מדריך ברירת מחדל</strong> - מדריך דוגמה עם תוכן מלא להשראה</li>
+              <li><strong>מבנה עבור AI</strong> - הורידו קובץ עם הסבר מפורט למבנה, העבירו למודל AI וביקשו לייצר מדריך</li>
+              <li><strong>טען קיים</strong> - אם יש לכם קובץ JSON של מדריך, העלו אותו</li>
+              <li>שם המדריך שתזינו יופיע בכותרת המדריך</li>
             </ul>
           </div>
         </div>

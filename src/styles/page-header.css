@@ -12,6 +12,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  position: relative;
   gap: var(--spacing-large);
 }
 
@@ -44,6 +45,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--spacing-large);
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .home-page .chapter-card {
@@ -55,11 +58,15 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   border: 1px solid var(--border-color);
   cursor: pointer;
+  box-sizing: border-box;
+  min-width: 0;
+  margin-top: 5px; /* מרווח למעלה כדי למנוע חיתוך */
 }
 
 .home-page .chapter-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  z-index: 5; /* הבטחת שהכרטיס יהיה מעל אחרים */
 }
 
 .home-page .chapter-card h2 {
@@ -72,4 +79,306 @@
   color: var(--secondary-text-color);
   margin: 0;
   line-height: 1.5;
+}
+
+/* כפתורי עריכה לפרקים */
+.home-page .chapter-card {
+  position: relative;
+}
+
+.home-page .chapter-controls {
+  display: none;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background-color: white;
+  border-radius: var(--border-radius-medium);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 10;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+}
+
+.edit-mode-active .home-page .chapter-card:hover .chapter-controls {
+  display: flex;
+}
+
+.chapter-control-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-small);
+  transition: background-color 0.2s;
+  width: 24px;
+  height: 24px;
+}
+
+.chapter-control-button:hover {
+  background-color: var(--neutral-background-color);
+}
+
+.chapter-control-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.chapter-control-button svg {
+  width: 14px;
+  height: 14px;
+  color: var(--secondary-text-color);
+}
+
+.chapter-control-button.delete:hover svg {
+  color: var(--danger-color);
+}
+
+/* תיבת עריכה לפרקים */
+.chapter-edit-form {
+  padding: var(--spacing-medium);
+  background: var(--surface-color);
+  border-radius: var(--border-radius-medium);
+  margin-top: var(--spacing-small);
+}
+
+.chapter-edit-form .edit-input {
+  width: 100%;
+  padding: var(--spacing-small);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  font-size: 1rem;
+  margin-bottom: var(--spacing-small);
+  font-family: inherit;
+}
+
+.chapter-edit-form .title-input {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.chapter-edit-form .content-input {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.chapter-edit-form .edit-buttons {
+  display: flex;
+  gap: var(--spacing-small);
+  justify-content: flex-end;
+}
+
+.chapter-edit-form .save-button,
+.chapter-edit-form .cancel-button {
+  padding: var(--spacing-small) var(--spacing-medium);
+  border: none;
+  border-radius: var(--border-radius-small);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.chapter-edit-form .save-button {
+  background: var(--primary-color);
+  color: white;
+}
+
+.chapter-edit-form .save-button:hover {
+  background: var(--primary-dark);
+}
+
+.chapter-edit-form .cancel-button {
+  background: var(--neutral-background-color);
+  color: var(--secondary-text-color);
+}
+
+.chapter-edit-form .cancel-button:hover {
+  background: var(--border-color);
+}
+
+/* כפתור עריכה לפרק בדף הפרק */
+.chapter-edit-button {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chapter-edit-button:hover {
+  background: var(--neutral-background-color);
+  border-color: var(--primary-color);
+}
+
+.chapter-edit-button svg {
+  width: 16px;
+  height: 16px;
+  color: var(--secondary-text-color);
+}
+
+.chapter-edit-button:hover svg {
+  color: var(--primary-color);
+}
+
+/* כפתור עריכה לפרק במסך הבית */
+.home-page .chapter-card {
+  position: relative;
+}
+
+.home-page .chapter-edit-button {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.home-page .chapter-edit-button:hover {
+  background: var(--neutral-background-color);
+  border-color: var(--primary-color);
+}
+
+.home-page .chapter-edit-button svg {
+  width: 16px;
+  height: 16px;
+  color: var(--secondary-text-color);
+}
+
+.home-page .chapter-edit-button:hover svg {
+  color: var(--primary-color);
+}
+
+/* כפתור עריכה לכותרת המדריך */
+.home-edit-button {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.home-edit-button:hover {
+  background: var(--neutral-background-color);
+  border-color: var(--primary-color);
+}
+
+.home-edit-button svg {
+  width: 16px;
+  height: 16px;
+  color: var(--secondary-text-color);
+}
+
+.home-edit-button:hover svg {
+  color: var(--primary-color);
+}
+
+/* הגדלת כתב במסך הבית */
+.home-page {
+  font-size: 18px; /* הגדלה מ-16px ל-18px */
+}
+
+.home-page h1 {
+  font-size: 2.2rem; /* הגדלה מ-2rem */
+}
+
+.home-page .chapter-card h2 {
+  font-size: 1.45rem; /* הגדלה מ-1.25rem */
+}
+
+.home-page .chapter-card p {
+  font-size: 1.1rem; /* הגדלה מ-0.9rem */
+}
+
+.home-page .home-content {
+  font-size: 1.1rem; /* הגדלה מ-1rem */
+}
+
+/* כפתור הוספת פרק חדש */
+.add-chapter-card {
+  border: 2px dashed var(--primary-color);
+  background: linear-gradient(135deg, rgba(0, 115, 234, 0.05), rgba(0, 115, 234, 0.1));
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.add-chapter-card:hover {
+  border-color: var(--primary-dark);
+  background: linear-gradient(135deg, rgba(0, 115, 234, 0.1), rgba(0, 115, 234, 0.15));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 115, 234, 0.2);
+}
+
+.add-chapter-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-medium);
+}
+
+.add-chapter-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-medium);
+  transition: all 0.3s ease;
+}
+
+.add-chapter-card:hover .add-chapter-icon {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+.add-chapter-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.add-chapter-card h2 {
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  margin: 0 0 var(--spacing-small) 0;
+  font-weight: 600;
+}
+
+.add-chapter-card p {
+  color: var(--secondary-text-color);
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.4;
 }

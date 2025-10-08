@@ -147,7 +147,7 @@ export default function Sidebar({ currentPage, currentChapterId, onNavigate }) {
                     className={`chapter-title-link nav-link ${currentChapterId === chapter.id ? 'active' : ''}`}
                     onClick={() => handleChapterClick(chapter.id)}
                   >
-                    {chapterIndex + 1}. {chapter.title}
+                    {chapter.title}
                   </span>
                   <div className="chapter-controls">
                     {isEditMode && (
@@ -206,7 +206,7 @@ export default function Sidebar({ currentPage, currentChapterId, onNavigate }) {
                           className="nav-link"
                           onClick={() => handleSectionClick(chapter.id, section.id)}
                         >
-                          {chapterIndex + 1}.{sectionIndex + 1} {section.title}
+                          {section.title}
                         </span>
                       </li>
                     ))}

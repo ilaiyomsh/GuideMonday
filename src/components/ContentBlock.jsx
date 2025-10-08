@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGuide } from '../context/GuideContext';
 import { MoveArrowUp, MoveArrowDown, Delete, Edit } from '@vibe/icons';
 import ContentBlockEditDialog from './ContentBlockEditDialog';
 import DOMPurify from 'dompurify';
 import { getBlockTypeName, getBlockTypeIcon, getBlockTypePlaceholder } from '../constants/blockTypes';
 
-export default function ContentBlock({ block, isEditMode, chapterId, sectionId, blockIndex, totalBlocks }) {
+export default function ContentBlock({ block, isEditMode, chapterId, sectionId, blockIndex, totalBlocks, isNewBlock }) {
   const { handleDeleteContentBlock, handleReorderContentBlock, direction } = useGuide();
   const [isHovered, setIsHovered] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  // פתיחה אוטומטית של דיאלוג עריכה לבלוק חדש
+  useEffect(() => {
+    if (isEditMode && isNewBlock) {
+      // פתח את הדיאלוג גם אם הבלוק לא ריק
+      setIsEditDialogOpen(true);
+    }
+  }, [isEditMode, isNewBlock]);
 
   const getFontSize = (size) => {
     return `${size}px`;
@@ -52,20 +60,7 @@ export default function ContentBlock({ block, isEditMode, chapterId, sectionId, 
         return (
           <video 
             controls 
-            style={{ maxWidth: '100%', height: 'auto' }}
             className="video-preview"
-            onLoad={(e) => {
-              // Add responsive behavior based on video dimensions
-              const video = e.target;
-              video.addEventListener('loadedmetadata', () => {
-                const aspectRatio = video.videoWidth / video.videoHeight;
-                if (aspectRatio > 1.5) {
-                  video.classList.add('wide-video');
-                } else if (aspectRatio < 0.8) {
-                  video.classList.add('tall-video');
-                }
-              });
-            }}
           >
             <source src={data.url} type="video/mp4" />
             <source src={data.url} type="video/webm" />
@@ -108,7 +103,6 @@ export default function ContentBlock({ block, isEditMode, chapterId, sectionId, 
               <img 
                 src={imgElement.src} 
                 alt={imgElement.alt || 'GIF Preview'}
-                style={{ maxWidth: '300px' }}
                 className="gif-preview"
               />
             </div>
@@ -133,16 +127,6 @@ export default function ContentBlock({ block, isEditMode, chapterId, sectionId, 
             alt={data.caption || 'GIF'} 
             loading="lazy"
             className="gif-preview"
-            onLoad={(e) => {
-              // Add responsive behavior based on image dimensions
-              const img = e.target;
-              const aspectRatio = img.naturalWidth / img.naturalHeight;
-              if (aspectRatio > 1.5) {
-                img.classList.add('wide-gif');
-              } else if (aspectRatio < 0.8) {
-                img.classList.add('tall-gif');
-              }
-            }}
           />
         </div>
       );
@@ -208,42 +192,38 @@ export default function ContentBlock({ block, isEditMode, chapterId, sectionId, 
         );
       case 'image':
         return (
-          <div className="block-image">
-            <img 
-              src={block.data.url} 
-              alt={block.data.caption || 'תמונה'} 
-              loading="lazy"
-              onLoad={(e) => {
-                // Add responsive behavior based on image dimensions
-                const img = e.target;
-                const aspectRatio = img.naturalWidth / img.naturalHeight;
-                if (aspectRatio > 1.5) {
-                  img.classList.add('wide-image');
-                } else if (aspectRatio < 0.8) {
-                  img.classList.add('tall-image');
-                }
-              }}
-            />
-            {block.data.caption && <figcaption>{block.data.caption}</figcaption>}
+          <div className="block-media-wrapper">
+            <div className="block-image">
+              <img 
+                src={block.data.url} 
+                alt={block.data.caption || 'תמונה'} 
+                loading="lazy"
+              />
+              {block.data.caption && <figcaption>{block.data.caption}</figcaption>}
+            </div>
           </div>
         );
       case 'video':
         return (
-          <div className="block-video">
-            <div className="video-container">
-              {renderVideoContent(block.data)}
+          <div className="block-media-wrapper">
+            <div className="block-video">
+              <div className="video-container">
+                {renderVideoContent(block.data)}
+              </div>
             </div>
           </div>
         );
       case 'gif':
         return (
-          <div className="block-gif">
-            <div className="gif-embed">
-              {renderGifContent(block.data)}
+          <div className="block-media-wrapper">
+            <div className="block-gif">
+              <div className="gif-embed">
+                {renderGifContent(block.data)}
+              </div>
+              {block.data.caption && (
+                <p className="gif-caption">{block.data.caption}</p>
+              )}
             </div>
-            {block.data.caption && (
-              <p className="gif-caption">{block.data.caption}</p>
-            )}
           </div>
         );
       case 'link':
@@ -310,7 +290,19 @@ export default function ContentBlock({ block, isEditMode, chapterId, sectionId, 
           <button 
             className="control-button delete" 
             title="מחק"
-            onClick={() => handleDeleteContentBlock(chapterId, sectionId, block.id)}
+            onClick={async () => {
+              const isMediaBlock = ['image', 'video', 'gif'].includes(block.type);
+              const hasMediaFile = block.data?.mediaItemId;
+              
+              let confirmMessage = 'האם למחוק בלוק זה?';
+              if (isMediaBlock && hasMediaFile) {
+                confirmMessage += '\n\nהקובץ יימחק גם מלוח המדיה.';
+              }
+              
+              if (window.confirm(confirmMessage)) {
+                await handleDeleteContentBlock(chapterId, sectionId, block.id);
+              }
+            }}
           >
             <Delete />
           </button>
