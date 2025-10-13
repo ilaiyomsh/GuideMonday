@@ -12,6 +12,12 @@ dist/
 *.tgz
 *.tar.gz
 
+# Development documentation and specs (internal use only)
+spec_docs/
+uploadcropcomponent/
+cleanup_script.sh
+CLEANUP_SUMMARY.md
+
 # Runtime data
 pids
 *.pid

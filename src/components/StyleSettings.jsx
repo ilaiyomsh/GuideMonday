@@ -214,18 +214,6 @@ export default function StyleSettings({ isOpen, onClose, onOpenUploadModal }) {
                     </svg>
                     בחר תמונה
                   </button>
-                  <div className="form-group">
-                    <label htmlFor="header-align">יישור כותרת</label>
-                    <select id="header-align" className="form-select">
-                      <option>יישור עם הטופס</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="logo-size">גודל לוגו</label>
-                    <select id="logo-size" className="form-select">
-                      <option>בינוני</option>
-                    </select>
-                  </div>
                 </div>
               </div>
             </div>
