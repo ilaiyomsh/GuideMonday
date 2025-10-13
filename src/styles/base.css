@@ -76,48 +76,20 @@ input, textarea, select, button {
 /* App Logo Section - Left Side of App */
 .app-logo-section {
   position: fixed;
-  left: 20px;
-  margin-top: 100px;
-  margin-bottom: 10px;
-  transform: translateY(-50%);
-  width: auto;
-  max-width: 200px;
+  left: 10px;
+  top: 65px;
+  width: 180px; /* גודל קבוע וקטן */
+  height: 120px; /* גודל קבוע וקטן */
   z-index: 1000;
-  padding-top: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* מונע גלישה */
 }
 
 .app-logo-image {
-  max-height: 80px; /* גובה מוגבל */
-  max-width: 100%;
-  object-fit: contain;
-  width: auto;
-  height: auto;
+  width: 100%; /* תופס את כל רוחב הקונטיינר */
+  height: 100%; /* תופס את כל גובה הקונטיינר */
+  object-fit: contain; /* שומר על פרופורציות */
   display: block;
-}
-
-/* Responsive Design for App Logo */
-@media (max-width: 768px) {
-  .app-logo-section {
-    position: fixed;
-    left: 10px;
-    top: 20px;
-    transform: none;
-    max-width: 150px;
-  }
-
-  .app-logo-image {
-    max-height: 60px;
-  }
-}
-
-@media (max-width: 480px) {
-  .app-logo-section {
-    left: 5px;
-    top: 15px;
-    max-width: 120px;
-  }
-
-  .app-logo-image {
-    max-height: 50px;
-  }
 }

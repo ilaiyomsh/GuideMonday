@@ -494,7 +494,7 @@ export default function ImageCropperModal({
                 <input 
                   className="cr-slider"
                   type="range" 
-                  min="1" 
+                  min="0.3" 
                   max="3" 
                   step="0.1" 
                   value={zoom}
