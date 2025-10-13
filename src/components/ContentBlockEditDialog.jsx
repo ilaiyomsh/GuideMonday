@@ -150,8 +150,6 @@ export default function ContentBlockEditDialog({
     }
   };
 
-  // הפונקציה הישנה הוסרה - כעת משתמשים ב-uploadFileToMediaBoard מ-useMondayApi
-
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
@@ -307,14 +305,6 @@ export default function ContentBlockEditDialog({
             <div className="form-field">
               <label>אפשרויות תמונה *</label>
               <div className="upload-options">
-                <button
-                  type="button"
-                  className="upload-button"
-                  onClick={triggerFileInput}
-                  disabled={isUploading}
-                >
-                  {isUploading ? 'מעלה...' : '📁 העלה תמונה מהמחשב'}
-                </button>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -322,6 +312,14 @@ export default function ContentBlockEditDialog({
                   onChange={handleFileUpload}
                   style={{ display: 'none' }}
                 />
+                <button
+                  type="button"
+                  className="upload-button"
+                  onClick={triggerFileInput}
+                  disabled={isUploading}
+                >
+                  {isUploading ? 'מעלה...' : '📤 העלה תמונה'}
+                </button>
                 {errors.file && <span className="error-message">{errors.file}</span>}
               </div>
             </div>
@@ -672,27 +670,29 @@ export default function ContentBlockEditDialog({
   };
 
   return (
-    <div className="modal-overlay" onClick={handleCancel}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>עריכת בלוק {getBlockTypeName(block.type)}</h3>
-          <button className="close-button" onClick={handleCancel}>×</button>
-        </div>
-        
-        <div className="modal-body">
-          {renderFormFields()}
-        </div>
-        
-        <div className="modal-footer">
-          <button className="cancel-button" onClick={handleCancel}>
-            ביטול
-          </button>
-          <button className="save-button" onClick={handleSave}>
-            שמור
-          </button>
+    <>
+      <div className="modal-overlay" onClick={handleCancel}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>עריכת בלוק {getBlockTypeName(block.type)}</h3>
+            <button className="close-button" onClick={handleCancel}>×</button>
+          </div>
+          
+          <div className="modal-body">
+            {renderFormFields()}
+          </div>
+          
+          <div className="modal-footer">
+            <button className="cancel-button" onClick={handleCancel}>
+              ביטול
+            </button>
+            <button className="save-button" onClick={handleSave}>
+              שמור
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

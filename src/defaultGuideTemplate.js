@@ -1,4 +1,23 @@
 export const DEFAULT_GUIDE_TEMPLATE = {
+  "globalBackground": null,
+  "style": {
+    "background": {
+      "color": null,
+      "type": "solid"
+    },
+    "logo": {
+      "image": null,
+      "altText": "",
+      "size": "medium",
+      "alignment": "center"
+    },
+    "font": {
+      "family": "Open Sans",
+      "size": "medium",
+      "weight": "normal",
+      "direction": "rtl"
+    }
+  },
   "homePage": {
     "title": "מדריך עריכה - כיצד לערוך ולנהל את המדריך האינטראקטיבי",
     "content": "ברוכים הבאים למדריך העריכה! מדריך זה יסביר לכם כיצד לערוך, לנהל ולהתאים אישית את המדריך האינטראקטיבי שלכם. המדריך מיועד לבעלי לוח בלבד."

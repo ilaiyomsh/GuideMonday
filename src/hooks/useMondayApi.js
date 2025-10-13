@@ -1,8 +1,10 @@
 import { useCallback } from 'react';
 import mondaySdk from 'monday-sdk-js';
 import { DEFAULT_GUIDE_TEMPLATE } from "../defaultGuideTemplate";
+import { DEFAULT_STYLE_TEMPLATE } from "../defaultStyleTemplate";
 import { STORAGE_KEYS } from '../constants/config';
 import { initializeMediaBoard, checkMediaBoardExists, checkMediaBoardValidity } from '../services/mediaBoardService';
+import * as styleService from '../services/styleService';
 
 const monday = mondaySdk();
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -49,6 +51,149 @@ export const useMondayApi = () => {
         monday.execute('notice', { message: 'שגיאה קריטית בשמירת המדריך.', type: 'error' });
         return false;
     }, []);
+
+    // ============================================
+    // Style Management Functions - NEW in v4.0
+    // ============================================
+
+    /**
+     * טעינת עיצוב מדריך מ-storage
+     * @returns {Promise<Object>} אובייקט עיצוב או ברירת מחדל
+     */
+    const fetchStyle = useCallback(async () => {
+        try {
+            console.log('🎨 מנסה לטעון עיצוב מדריך...');
+            const res = await monday.storage.instance.getItem('guideStyle');
+            const storedString = res?.data?.value;
+            
+            if (storedString && storedString.trim() !== '') {
+                const parsedStyle = JSON.parse(storedString);
+                console.log('✅ עיצוב נטען בהצלחה מ-storage');
+                return parsedStyle;
+            }
+            
+            // אין עיצוב שמור - החזר ברירת מחדל
+            console.log('📋 לא נמצא עיצוב שמור, משתמש בברירת מחדל');
+            return { ...DEFAULT_STYLE_TEMPLATE };
+            
+        } catch (error) {
+            console.error("❌ שגיאה בטעינת עיצוב:", error);
+            // במקרה של שגיאה - החזר ברירת מחדל
+            return { ...DEFAULT_STYLE_TEMPLATE };
+        }
+    }, []);
+
+    /**
+     * שמירת עיצוב מדריך ל-storage
+     * @param {Object} styleToSave - אובייקט עיצוב לשמירה
+     * @returns {Promise<boolean>} הצלחה/כישלון
+     */
+    const saveStyle = useCallback(async (styleToSave) => {
+        if (!styleToSave) {
+            console.warn('⚠️ אין עיצוב לשמירה');
+            return false;
+        }
+        
+        try {
+            console.log('💾 שומר עיצוב ל-storage...');
+            const jsonString = JSON.stringify(styleToSave);
+            await monday.storage.instance.setItem('guideStyle', jsonString);
+            
+            // וידוא שמירה
+            await sleep(300);
+            const verifyRes = await monday.storage.instance.getItem('guideStyle');
+            
+            if (verifyRes?.data?.value) {
+                console.log('✅ עיצוב נשמר בהצלחה');
+                monday.execute('notice', { 
+                    message: 'העיצוב נשמר בהצלחה ✨', 
+                    type: 'success' 
+                });
+                return true;
+            }
+            
+            console.error('❌ אימות שמירת עיצוב נכשל');
+            return false;
+            
+        } catch (error) {
+            console.error('❌ שגיאה בשמירת עיצוב:', error);
+            monday.execute('notice', { 
+                message: 'שגיאה בשמירת העיצוב', 
+                type: 'error' 
+            });
+            return false;
+        }
+    }, []);
+
+    /**
+     * מיגרציה חד-פעמית: העברת עיצוב מ-guideData ל-guideStyle נפרד
+     * @returns {Promise<boolean>} הצלחה/כישלון
+     */
+    const migrateStyleToSeparateStorage = useCallback(async () => {
+        try {
+            console.log('🔄 בודק אם נדרשת מיגרציית עיצוב...');
+            
+            // בדוק אם כבר יש guideStyle
+            const existingStyleRes = await monday.storage.instance.getItem('guideStyle');
+            if (existingStyleRes?.data?.value) {
+                console.log('✅ עיצוב כבר קיים ב-storage נפרד, לא צריך מיגרציה');
+                return true;
+            }
+            
+            // טען את ה-guideData לבדיקה
+            const guideDataRes = await monday.storage.instance.getItem('guideData');
+            if (!guideDataRes?.data?.value) {
+                console.log('ℹ️ אין guideData, אין צורך במיגרציה');
+                // צור עיצוב ברירת מחדל
+                await saveStyle({ ...DEFAULT_STYLE_TEMPLATE });
+                return true;
+            }
+            
+            const guideData = JSON.parse(guideDataRes.data.value);
+            
+            // בדוק אם יש עיצוב מוטמע שצריך למגרר
+            if (!styleService.hasEmbeddedStyle(guideData)) {
+                console.log('ℹ️ אין עיצוב מוטמע ב-guideData, יוצר ברירת מחדל');
+                await saveStyle({ ...DEFAULT_STYLE_TEMPLATE });
+                return true;
+            }
+            
+            console.log('🚀 מתחיל מיגרציית עיצוב...');
+            
+            // חלץ את העיצוב מ-guideData
+            const extractedStyle = styleService.migrateStyleFromGuideData(guideData);
+            console.log('📤 עיצוב חולץ:', extractedStyle);
+            
+            // שמור את העיצוב בנפרד
+            const styleSaved = await saveStyle(extractedStyle);
+            if (!styleSaved) {
+                console.error('❌ שמירת עיצוב נכשלה');
+                return false;
+            }
+            
+            // נקה את העיצוב מ-guideData
+            const cleanedGuideData = styleService.removeStyleFromGuideData(guideData);
+            console.log('🧹 מנקה עיצוב מ-guideData');
+            
+            const guideSaved = await saveGuide(cleanedGuideData);
+            if (!guideSaved) {
+                console.error('❌ שמירת guideData מנוקה נכשלה');
+                return false;
+            }
+            
+            console.log('✅ מיגרציית עיצוב הושלמה בהצלחה!');
+            monday.execute('notice', { 
+                message: 'המדריך עודכן לגרסה 4.0 - עיצוב מופרד 🎉', 
+                type: 'success',
+                timeout: 5000
+            });
+            return true;
+            
+        } catch (error) {
+            console.error('❌ שגיאה במיגרציית עיצוב:', error);
+            return false;
+        }
+    }, [saveStyle, saveGuide]);
 
     /**
      * קבלת קונפיגורציה דינמית של לוח המדיה
@@ -297,7 +442,12 @@ export const useMondayApi = () => {
 
     return { 
         fetchGuide, 
-        saveGuide, 
+        saveGuide,
+        // Style management - NEW in v4.0
+        fetchStyle,
+        saveStyle,
+        migrateStyleToSeparateStorage,
+        // Media board functions
         getMediaBoardConfig, 
         ensureMediaBoardReady, 
         uploadFileToMediaBoard,

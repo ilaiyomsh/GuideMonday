@@ -10,7 +10,7 @@
 export const GUIDE_STRUCTURE_EXAMPLE = {
   // ===== META: הנחיות למודל ולוולידציה =====
   "meta": {
-    "version": "1.0",
+    "version": "2.0",
     "language": "he",
     "purpose": "קובץ תבנית לעריכה אוטומטית ע\"י מודל בינה מלאכותית",
     "ai_instructions": {
@@ -21,7 +21,8 @@ export const GUIDE_STRUCTURE_EXAMPLE = {
         "add_section",
         "add_block",
         "reorder",
-        "delete_block"
+        "delete_block",
+        "update_style_settings"
       ],
       "disallowed_operations": [
         "remove_meta",
@@ -42,7 +43,7 @@ export const GUIDE_STRUCTURE_EXAMPLE = {
         "sanitize_urls": true
       },
       "validation": {
-        "required_top_level": ["homePage","chapters"],
+        "required_top_level": ["homePage","chapters","style"],
         "chapter_required_fields": ["id","title"],
         "section_required_fields": ["id","title","contentBlocks"],
         "block_required_fields": ["id","type","data"],
@@ -50,6 +51,34 @@ export const GUIDE_STRUCTURE_EXAMPLE = {
       }
     }
   },
+  
+  // ===== הגדרות סגנון גלובליות =====
+  "globalBackground": null, // צבע רקע גלובלי (hex או null)
+  
+  "style": {
+    // הגדרות רקע
+    "background": {
+      "color": null,        // צבע רקע (hex string או null)
+      "type": "solid"       // סוג רקע: "solid", "gradient", "pattern"
+    },
+    
+    // הגדרות לוגו
+    "logo": {
+      "image": null,        // נתיב תמונה או base64 string
+      "altText": "",    // טקסט חלופי ללוגו
+      "size": "medium",     // גודל: "small", "medium", "large"
+      "alignment": "center" // יישור: "left", "center", "right"
+    },
+    
+    // הגדרות פונט
+    "font": {
+      "family": "Open Sans", // משפחת פונט
+      "size": "medium",      // גודל: "small", "medium", "large"
+      "weight": "normal",    // משקל: "light", "normal", "bold"
+      "direction": "rtl"     // כיוון: "rtl", "ltr"
+    }
+  },
+  
   // ===== דף הבית =====
   "homePage": {
     // חובה: כותרת קצרה וברורה לדף הבית (טקסט רגיל, ללא HTML)
@@ -194,5 +223,15 @@ export const GUIDE_STRUCTURE_EXAMPLE = {
  *    - כל אובייקט חייב לכלול את השדה "id"
  *    - כל בלוק חייב לכלול "id", "type", ו-"data"
  *    - תוכן השדה "data" משתנה בהתאם לסוג הבלוק
+ * 
+ * 5. הגדרות סגנון (style):
+ *    - globalBackground: צבע רקע גלובלי (תאימות לאחור)
+ *    - style.background: הגדרות רקע מתקדמות
+ *    - style.logo: הגדרות לוגו ותמונה
+ *    - style.font: הגדרות פונט וטקסט
+ * 
+ * 6. גרסאות (versions):
+ *    - גרסה 2.0: הוספת אובייקט style מלא
+ *    - מיגרציה אוטומטית מגרסה 1.0 ל-2.0
  */
 

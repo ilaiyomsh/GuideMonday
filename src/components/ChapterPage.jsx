@@ -1,57 +1,91 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGuide } from '../context/GuideContext';
 import ContentBlock from './ContentBlock';
 import { Edit, MoveArrowUp, MoveArrowDown, Delete, TextFormatting, Image, Video, Gif, Link, Form } from '@vibe/icons';
 
 export default function ChapterPage({ chapter, onNavigate }) {
-  const { guideData, isEditMode, handleAddSection, handleAddContentBlock, handleUpdateChapter, handleUpdateSection, handleReorderSection, handleDeleteSection } = useGuide();
+  const { guideData, styleData, isEditMode, handleAddSection, handleAddContentBlock, handleUpdateChapter, handleUpdateSection, handleReorderSection, handleDeleteSection } = useGuide();
   const [expandedSections, setExpandedSections] = useState(new Set());
   const [editingChapter, setEditingChapter] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
   const [chapterData, setChapterData] = useState({ title: '', content: '' });
   const [sectionData, setSectionData] = useState({ title: '' });
-  const [lastSectionCount, setLastSectionCount] = useState(0);
   const [sectionBlockCounts, setSectionBlockCounts] = useState({});
   const [newBlockId, setNewBlockId] = useState(null);
+  const lastSectionCountRef = useRef(0);
+  const isInitialLoadRef = useRef(true);
 
   // Find chapter index for numbering
   const chapterIndex = guideData?.chapters?.findIndex(ch => ch.id === chapter?.id) ?? -1;
 
-  // Collapse all sections when chapter changes
+  // Collapse all sections when chapter changes & reset counters
   useEffect(() => {
     setExpandedSections(new Set());
+    // אפס את ספירת הבלוקים והסעיפים כשמשנים פרק
+    setSectionBlockCounts({});
+    lastSectionCountRef.current = 0;
+    isInitialLoadRef.current = true;
   }, [chapter?.id]);
+
+  // אתחול ספירת בלוקים בפעם הראשונה שהפרק נטען
+  useEffect(() => {
+    if (!chapter?.sections) return;
+    
+    // רק בטעינה ראשונית
+    if (isInitialLoadRef.current) {
+      const initialCounts = {};
+      chapter.sections.forEach(section => {
+        initialCounts[section.id] = section.contentBlocks?.length || 0;
+      });
+      setSectionBlockCounts(initialCounts);
+      lastSectionCountRef.current = chapter.sections.length;
+      isInitialLoadRef.current = false;
+      console.log('🔢 אתחול ספירות:', { sections: chapter.sections.length, blocks: initialCounts });
+    }
+  }, [chapter?.sections]);
 
   // פתיחה אוטומטית של עריכה כאשר נוסף סעיף חדש
   useEffect(() => {
-    if (chapter?.sections && chapter.sections.length > lastSectionCount && lastSectionCount > 0) {
-      // נוסף סעיף חדש - פתח אותו לעריכה
+    const currentSectionCount = chapter?.sections?.length || 0;
+    const prevCount = lastSectionCountRef.current;
+    
+    // פתח עריכה רק אם באמת נוסף סעיף (ולא בטעינה ראשונית)
+    if (!isInitialLoadRef.current && currentSectionCount > prevCount && prevCount > 0) {
       const newSection = chapter.sections[chapter.sections.length - 1];
       setEditingSection(newSection.id);
       setSectionData({ title: newSection.title });
       // הרחב את הסעיף החדש
       setExpandedSections(prev => new Set([...prev, newSection.id]));
+      console.log('➕ נוסף סעיף חדש:', newSection.title);
     }
-    setLastSectionCount(chapter?.sections?.length || 0);
+    
+    lastSectionCountRef.current = currentSectionCount;
   }, [chapter?.sections?.length]);
 
   // מעקב אחרי בלוקים חדשים בכל סעיף
   useEffect(() => {
     if (!chapter?.sections) return;
     
+    // אל תריץ אם זו טעינה ראשונה
+    if (isInitialLoadRef.current || Object.keys(sectionBlockCounts).length === 0) return;
+    
     const newCounts = {};
+    let foundNewBlock = false;
+    
     chapter.sections.forEach(section => {
       const currentCount = section.contentBlocks?.length || 0;
       const previousCount = sectionBlockCounts[section.id] || 0;
       
       if (currentCount > previousCount) {
-        // נוסף בלוק חדש לסעיף זה (כולל הבלוק הראשון)
+        // נוסף בלוק חדש לסעיף זה
         const newBlock = section.contentBlocks[section.contentBlocks.length - 1];
         setNewBlockId(newBlock.id);
+        foundNewBlock = true;
         // הרחב את הסעיף אם הוא לא מורחב
         setExpandedSections(prev => new Set([...prev, section.id]));
         // נקה את המזהה החדש אחרי רגע
         setTimeout(() => setNewBlockId(null), 100);
+        console.log('➕ נוסף בלוק חדש:', newBlock.type, 'בסעיף:', section.title);
       }
       
       newCounts[section.id] = currentCount;
@@ -154,7 +188,7 @@ export default function ChapterPage({ chapter, onNavigate }) {
             </div>
           </div>
         )}
-        </header>
+      </header>
       
       <div className="sections-container">
         {chapter.sections && chapter.sections.map((section, index) => {
@@ -203,7 +237,7 @@ export default function ChapterPage({ chapter, onNavigate }) {
                   >
                     <span>{section.title}</span>
                     <svg className="accordion-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+                      <path d={isExpanded ? "M9 6L15 12L9 18" : "M15 6L9 12L15 18"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
                     </svg>
                   </button>
                   <div className="section-controls">

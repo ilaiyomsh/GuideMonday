@@ -5,20 +5,36 @@
   gap: var(--spacing-medium);
   border-bottom: 1px solid var(--border-color);
   padding-bottom: var(--spacing-large);
-  margin-bottom: var(--spacing-xlarge);
+  margin-bottom: var(--spacing-large);
+  min-height: 120px; /* גובה מינימלי לכותרת */
 }
 
 .page-header-content {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: center; /* מירכוז הכותרת */
+  align-items: center;
   position: relative;
-  gap: var(--spacing-large);
+  min-height: 100px; /* גובה מינימלי */
+}
+
+
+.page-header-content .chapter-edit-button {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-medium);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 100;
 }
 
 .header-text {
   flex-grow: 1;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .header-text h1 {
@@ -30,6 +46,7 @@
   color: var(--primary-text-color);
   margin: 0;
   font-weight: 700;
+  text-align: center;
 }
 
 .home-content,
@@ -38,6 +55,7 @@
   font-size: 1.1rem;
   line-height: 1.6;
   margin-top: var(--spacing-small);
+  text-align: right;
 }
 
 /* Home Page */
@@ -94,9 +112,9 @@
   background-color: white;
   border-radius: var(--border-radius-medium);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  z-index: 10;
+  z-index: 1;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   padding: 4px;
 }
 
@@ -104,33 +122,55 @@
   display: flex;
 }
 
-.chapter-control-button {
+.chapter-control-button,
+.chapter-edit-button,
+.chapter-reorder-button,
+.chapter-delete-button {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--border-radius-small);
   transition: background-color 0.2s;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
+  z-index: 1;
+
 }
 
-.chapter-control-button:hover {
+.chapter-control-button:hover,
+.chapter-edit-button:hover,
+.chapter-reorder-button:hover,
+.chapter-delete-button:hover {
   background-color: var(--neutral-background-color);
 }
 
-.chapter-control-button:disabled {
+.chapter-control-button:disabled,
+.chapter-reorder-button:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
 
-.chapter-control-button svg {
-  width: 14px;
-  height: 14px;
+.chapter-control-button svg,
+.chapter-edit-button svg,
+.chapter-reorder-button svg,
+.chapter-delete-button svg {
+  width: 16px;
+  height: 16px;
   color: var(--secondary-text-color);
+}
+
+.chapter-control-button:hover svg,
+.chapter-edit-button:hover svg,
+.chapter-reorder-button:hover svg {
+  color: var(--primary-color);
+}
+
+.chapter-delete-button:hover svg {
+  color: var(--danger-color);
 }
 
 .chapter-control-button.delete:hover svg {
@@ -169,6 +209,7 @@
   display: flex;
   gap: var(--spacing-small);
   justify-content: flex-end;
+  z-index: 1;
 }
 
 .chapter-edit-form .save-button,
@@ -199,75 +240,12 @@
   background: var(--border-color);
 }
 
-/* כפתור עריכה לפרק בדף הפרק */
-.chapter-edit-button {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-small);
-  padding: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  z-index: 10;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.chapter-edit-button:hover {
-  background: var(--neutral-background-color);
-  border-color: var(--primary-color);
-}
-
-.chapter-edit-button svg {
-  width: 16px;
-  height: 16px;
-  color: var(--secondary-text-color);
-}
-
-.chapter-edit-button:hover svg {
-  color: var(--primary-color);
-}
 
 /* כפתור עריכה לפרק במסך הבית */
 .home-page .chapter-card {
   position: relative;
 }
 
-.home-page .chapter-edit-button {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-small);
-  padding: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  z-index: 10;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.home-page .chapter-edit-button:hover {
-  background: var(--neutral-background-color);
-  border-color: var(--primary-color);
-}
-
-.home-page .chapter-edit-button svg {
-  width: 16px;
-  height: 16px;
-  color: var(--secondary-text-color);
-}
-
-.home-page .chapter-edit-button:hover svg {
-  color: var(--primary-color);
-}
 
 /* כפתור עריכה לכותרת המדריך */
 .home-edit-button {
@@ -283,7 +261,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  z-index: 10;
+  z-index: 100;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -381,4 +359,19 @@
   font-size: 0.85rem;
   margin: 0;
   line-height: 1.4;
+}
+
+
+@media (max-width: 480px) {
+  .page-header-logo {
+    height: 60px;
+  }
+
+  .page-header-logo .logo-image {
+    max-height: 50px;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
 }

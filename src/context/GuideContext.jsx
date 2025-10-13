@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useMemo, useState, useEffect, useCallback } from 'react';
 import { useGuideManager } from '../hooks/useGuideManager';
+import { useStyleManager } from '../hooks/useStyleManager';
+import { useMondayApi } from '../hooks/useMondayApi';
 import { initializeMediaBoard, checkMediaBoardValidity, clearMediaBoardStorage } from '../services/mediaBoardService';
 import MediaBoardDialog from '../components/MediaBoardDialog';
 
@@ -29,6 +31,12 @@ export const useGuide = () => {
  */
 export const GuideProvider = ({ children }) => {
     const guideManagerValues = useGuideManager();
+    
+    // Get Monday API functions (including new style functions)
+    const { fetchStyle, saveStyle, migrateStyleToSeparateStorage } = useMondayApi();
+    
+    // Style Manager - NEW in v4.0 - manages style separately from content
+    const styleManagerValues = useStyleManager(fetchStyle, saveStyle);
     
     // State לניהול לוח המדיה - אתחול מרכזי פעם אחת
     const [mediaBoardState, setMediaBoardState] = useState({
@@ -173,6 +181,20 @@ export const GuideProvider = ({ children }) => {
         };
     }, [guideManagerValues.guideData, checkMediaBoardWithDialog, initializeMediaBoardWithState]);
     
+    // מיגרציה חד-פעמית של עיצוב - NEW in v4.0
+    // מריץ את המיגרציה פעם אחת כשהאפליקציה נטענת
+    useEffect(() => {
+        const runStyleMigration = async () => {
+            console.log('🔄 מריץ מיגרציית עיצוב חד-פעמית...');
+            await migrateStyleToSeparateStorage();
+        };
+        
+        // רק אם יש guideData נטען
+        if (guideManagerValues.guideData && !guideManagerValues.isLoading) {
+            runStyleMigration();
+        }
+    }, [guideManagerValues.guideData, guideManagerValues.isLoading, migrateStyleToSeparateStorage]);
+    
     // פונקציות עזר לקבלת context של פרק וסעיף
     const getChapterContext = useMemo(() => {
         return (chapterId) => {
@@ -214,6 +236,7 @@ export const GuideProvider = ({ children }) => {
 
     const contextValue = {
         ...guideManagerValues,
+        ...styleManagerValues,  // Style management - NEW in v4.0
         direction: 'rtl', // Hebrew direction
         guideName,
         getChapterContext,

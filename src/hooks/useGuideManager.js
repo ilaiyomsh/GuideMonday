@@ -3,6 +3,7 @@ import { useMondayApi } from './useMondayApi';
 import mondaySdk from 'monday-sdk-js';
 import { deepClone, isEqual } from '../utils/helpers';
 import * as guideService from '../services/guideService';
+import { loadGuideWithMigration } from '../services/guideService';
 
 const monday = mondaySdk();
 monday.setApiVersion("2023-10");
@@ -218,14 +219,27 @@ export const useGuideManager = () => {
     setGuideData(prevData => guideService.addContentBlock(prevData, chapterId, sectionId, blockType));
   };
 
+  // NOTE: Style management moved to useStyleManager hook in v4.0
+  // Background and style settings are now managed separately
+
   // Function to load guide data from external source (setup screen)
   const loadGuideData = useCallback(async (newGuideData) => {
-    setGuideData(newGuideData);
-    setOriginalData(deepClone(newGuideData));
+    // הפעלת מיגרציה אוטומטית
+    const migrationResult = loadGuideWithMigration(newGuideData);
+    const migratedData = migrationResult.guideData;
+    
+    // הצגת הודעה למשתמש אם בוצעה מיגרציה
+    if (migrationResult.wasMigrated) {
+      console.log('מדריך עודכן לגרסה החדשה!');
+      // כאן אפשר להוסיף הודעה למשתמש
+    }
+    
+    setGuideData(migratedData);
+    setOriginalData(deepClone(migratedData));
     
     // Save the new guide data to Monday Storage
     try {
-      await saveApi(newGuideData);
+      await saveApi(migratedData);
       console.log("Guide data saved to Monday Storage successfully");
     } catch (error) {
       console.error("Failed to save guide data to Monday Storage:", error);
@@ -257,5 +271,6 @@ export const useGuideManager = () => {
     handleAddChapter,
     handleAddSection,
     handleAddContentBlock,
+    // NOTE: Style management moved to useStyleManager (v4.0)
   };
 };

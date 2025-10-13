@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload & Crop Component</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="upload-cropper">
+            <h1>Image Upload & Crop</h1>
+            <p class="description">Upload an image and use the controls below to crop it to your desired size and position.</p>
+            
+            <!-- File Input -->
+            <div class="form-group">
+                <label for="fileInput" class="form-label">Select Image</label>
+                <input type="file" id="fileInput" accept="image/*" class="form-control" />
+            </div>
+
+            <!-- Crop Area -->
+            <div id="cropContainer" class="crop-container hidden">
+                <div class="crop-wrapper">
+                    <canvas id="imageCanvas" class="image-canvas"></canvas>
+                    <div id="cropOverlay" class="crop-overlay">
+                        <div id="cropBox" class="crop-box">
+                            <div class="crop-handle crop-handle-tl"></div>
+                            <div class="crop-handle crop-handle-tr"></div>
+                            <div class="crop-handle crop-handle-bl"></div>
+                            <div class="crop-handle crop-handle-br"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div id="controls" class="controls hidden">
+                <div class="control-group">
+                    <label for="zoomSlider" class="form-label">
+                        Zoom: <span id="zoomValue">1.0</span>x
+                    </label>
+                    <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1" class="form-control">
+                </div>
+
+                <div class="control-group">
+                    <label for="rotationSlider" class="form-label">
+                        Rotation: <span id="rotationValue">0</span>°
+                    </label>
+                    <input type="range" id="rotationSlider" min="0" max="360" step="1" value="0" class="form-control">
+                </div>
+
+                <button id="confirmCrop" class="btn btn--primary btn--full-width">
+                    Confirm Crop
+                </button>
+            </div>
+
+            <!-- Preview -->
+            <div id="previewSection" class="preview-section hidden">
+                <h3>Cropped Preview</h3>
+                <div class="preview-container">
+                    <canvas id="previewCanvas" class="preview-canvas"></canvas>
+                </div>
+                <div class="preview-info">
+                    <p class="text-secondary">Your cropped image is ready! The processed image blob can be uploaded to a server.</p>
+                    <button id="downloadCrop" class="btn btn--secondary">
+                        Download Cropped Image
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -3,7 +3,7 @@ import { useGuide } from '../context/GuideContext';
 import { Edit, Add, MoveArrowUp, MoveArrowDown, Delete } from '@vibe/icons';
 
 export default function HomePage({ onNavigate }) {
-  const { guideData, isEditMode, handleUpdateHomePage, handleAddChapter, handleReorderChapter, handleDeleteChapter, handleUpdateChapter } = useGuide();
+  const { guideData, styleData, isEditMode, handleUpdateHomePage, handleAddChapter, handleReorderChapter, handleDeleteChapter, handleUpdateChapter } = useGuide();
   const [isEditingHomePage, setIsEditingHomePage] = useState(false);
   const [homePageData, setHomePageData] = useState({
     title: guideData?.homePage?.title || 'ברוכים הבאים',
@@ -176,16 +176,41 @@ export default function HomePage({ onNavigate }) {
             ) : (
               <>
                 {isEditMode && (
-                  <button 
-                    className="chapter-edit-button"
-                    onClick={(e) => handleEditChapter(chapter, e)}
-                    title="ערוך פרק"
-                  >
-                    <Edit />
-                  </button>
+                  <div className="chapter-controls">
+                    <button 
+                      className="chapter-edit-button"
+                      onClick={(e) => handleEditChapter(chapter, e)}
+                      title="ערוך פרק"
+                    >
+                      <Edit />
+                    </button>
+                    <button 
+                      className="chapter-reorder-button"
+                      onClick={(e) => handleReorderChapterClick(chapter.id, 'up', e)}
+                      disabled={index === 0}
+                      title="הזז למעלה"
+                    >
+                      <MoveArrowUp />
+                    </button>
+                    <button 
+                      className="chapter-reorder-button"
+                      onClick={(e) => handleReorderChapterClick(chapter.id, 'down', e)}
+                      disabled={index === guideData.chapters.length - 1}
+                      title="הזז למטה"
+                    >
+                      <MoveArrowDown />
+                    </button>
+                    <button 
+                      className="chapter-delete-button"
+                      onClick={(e) => handleDeleteChapterClick(chapter.id, e)}
+                      title="מחק פרק"
+                    >
+                      <Delete />
+                    </button>
+                  </div>
                 )}
                 <h2>{chapter.title}</h2>
-                <p>{chapter.description || chapter.content || 'תיאור הפרק יופיע כאן'}</p>
+                <p>{chapter.description || chapter.content}</p>
               </>
             )}
           </div>

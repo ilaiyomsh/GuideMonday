@@ -29,3 +29,5 @@ export const deepClone = (obj) => {
 export const isEqual = (obj1, obj2) => {
   return JSON.stringify(obj1) === JSON.stringify(obj2);
 };
+
+// backgroundToCss function removed - no longer needed as we use simple color strings

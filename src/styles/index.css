@@ -3,6 +3,13 @@
  * Imports all modular CSS files for the Guide application
  */
 
+/* 0. Google Fonts - Must be first */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap');
+
 /* 1. CSS Variables - Must be first */
 @import './variables.css';
 
@@ -27,11 +34,17 @@
 /* 7. Modal Dialogs */
 @import './modal.css';
 
-/* 8. Text Editor */
+/* 8. Style Settings */
+@import './style-settings.css';
+
+/* 9. Text Editor */
 @import './editor.css';
 
 /* 9. Setup Screen */
 @import './setup.css';
 
-/* 10. Responsive Design - Must be last */
+/* 10. Table of Contents */
+@import './table-of-contents.css';
+
+/* 11. Responsive Design - Must be last */
 @import './responsive.css';

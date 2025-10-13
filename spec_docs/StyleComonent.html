@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Component</title>
+    <!-- טעינת Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- טעינת Cropper.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&display=swap');
+        body {
+            font-family: 'Open Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        .select-arrow { right: 0.5rem; }
+        html[dir="rtl"] .select-arrow { left: 0.5rem; right: auto; }
+        #upload-modal.hidden { display: none; }
+        
+        /* Styles for Cropper.js container */
+        .cropper-container {
+            direction: ltr; /* Cropper.js works best in LTR mode */
+        }
+        .img-container {
+            width: 100%;
+            height: 350px;
+            background-color: #f3f4f6;
+        }
+        #image-to-crop {
+            display: block;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- קונטיינר ראשי של הקומפוננטה -->
+    <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
+        <h2 class="text-xl font-bold text-gray-900 mb-6">Customize</h2>
+
+        <div id="accordion-container" class="space-y-3">
+            <!-- 1. פריט אקורדיון: ערכת נושא -->
+            <div class="accordion-item border border-gray-200 rounded-lg overflow-hidden">
+                <button class="accordion-toggle flex items-center justify-between w-full p-3 text-right hover:bg-gray-50 transition-colors focus:outline-none">
+                    <div class="flex items-center gap-3"><svg width="24" height="24" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-700"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 3.92574C8.69962 3.92574 7.42844 4.31139 6.34725 5.0339C5.26606 5.75641 4.42342 6.78333 3.92591 7.98478C3.42841 9.18623 3.29838 10.5082 3.55227 11.7836C3.80488 13.0525 4.42622 14.2184 5.33827 15.1356C5.44218 15.2255 5.57593 15.2737 5.71362 15.2706C5.85591 15.2673 5.9915 15.2095 6.09232 15.109C6.19314 15.0085 6.25147 14.8731 6.25522 14.7309C6.25897 14.5886 6.20787 14.4503 6.11248 14.3447L6.10013 14.3306C5.87953 14.073 5.76426 13.7417 5.77735 13.4028C5.79044 13.0639 5.93093 12.7424 6.17074 12.5026C6.41055 12.2628 6.73202 12.1223 7.07091 12.1092C7.4098 12.0961 7.74115 12.2114 7.99874 12.432C8.01247 12.4438 8.02574 12.456 8.03853 12.4688L10.726 15.1499C10.9834 15.4075 11.2891 15.6118 11.6255 15.7512C11.962 15.8906 12.3226 15.9623 12.6867 15.9623C13.0509 15.9623 13.4115 15.8906 13.7479 15.7512C14.0844 15.6118 14.39 15.4075 14.6475 15.1499C15.5672 14.2306 16.1938 13.059 16.4477 11.7836C16.7016 10.5082 16.5716 9.18623 16.0741 7.98478C15.5766 6.78333 14.7339 5.75641 13.6528 5.0339C12.5716 4.31139 11.3004 3.92574 10 3.92574ZM5.55509 3.84848C6.87075 2.96928 8.4176 2.5 10 2.5C11.5824 2.5 13.1292 2.96928 14.4449 3.84848C15.7606 4.72768 16.786 5.97731 17.3914 7.43932C17.9968 8.90132 18.155 10.51 17.846 12.062C17.5371 13.6139 16.7748 15.0394 15.6556 16.158C15.2659 16.548 14.8031 16.8573 14.2937 17.0683C13.7842 17.2794 13.2382 17.3881 12.6867 17.3881C12.1353 17.3881 11.5892 17.2794 11.0798 17.0683C10.5705 16.8573 10.1078 16.5481 9.71805 16.1583L7.54221 13.9876C7.63961 14.2337 7.68757 14.4991 7.68047 14.7685C7.66706 15.2766 7.45876 15.7601 7.09869 16.1189C6.73862 16.4777 6.25435 16.6843 5.74616 16.6959C5.23797 16.7075 4.74478 16.5233 4.36871 16.1813C4.36041 16.1737 4.35229 16.166 4.34435 16.158C3.22519 15.0394 2.46293 13.6139 2.15397 12.062C1.84501 10.51 2.00324 8.90132 2.60864 7.43932C3.21404 5.97731 4.23942 4.72768 5.55509 3.84848Z" fill="currentColor"></path></svg><span class="text-gray-800 font-medium">Color theme</span></div>
+                    <div class="flex items-center gap-3"><div class="flex w-12 h-6 rounded-full overflow-hidden border border-gray-300"><div class="w-1/2" style="background-color: #ffe580;"></div><div class="w-1/2" style="background-color: #4B5563;"></div></div><svg viewBox="0 0 20 20" fill="currentColor" width="20" height="20" class="arrow text-gray-400 transform transition-transform duration-300"><path fill="currentColor" d="M12.76 10.56a.77.77 0 0 0 0-1.116L8.397 5.233a.84.84 0 0 0-1.157 0 .77.77 0 0 0 0 1.116l3.785 3.653-3.785 3.652a.77.77 0 0 0 0 1.117.84.84 0 0 0 1.157 0l4.363-4.211Z"></path></svg></div>
+                </button>
+                <div class="accordion-content bg-gray-50"><div class="p-4 space-y-4"><div class="relative"><div class="flex items-center gap-2 p-2 border border-gray-300 rounded-md bg-white"><div class="w-6 h-6 rounded-full" style="background-color: #ffe580;"></div><select class="w-full bg-transparent appearance-none text-gray-700 focus:outline-none"><option>Primary color</option></select><svg class="fill-current h-4 w-4 text-gray-500 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"></path></svg></div></div><div><h4 class="font-semibold text-gray-800 mb-2 text-sm">Default colors</h4><div class="grid grid-cols-6 gap-2"><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #457d50;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #5cb85c;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #9ccc65;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #c7a23c;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #fdd835;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #f5a623;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #2e7d32;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #4dd0e1;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #d2b48c;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #bc8f8f;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #f4511e;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #e57373;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #1e88e5;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #64b5f6;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #90a4ae;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #c62828;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #9c27b0;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #d81b60;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #2962ff;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #3d5afe;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #5e35b1;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #673ab7;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #ce93d8;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #ec407a;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #455a64;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #795548;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #78909c;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #b0bec5;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #cfd8dc;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #9fa8da;"></div></div></div></div></div>
+            </div>
+
+            <!-- 2. פריט אקורדיון: רקע -->
+            <div class="accordion-item border border-gray-200 rounded-lg overflow-hidden">
+                <button class="accordion-toggle flex items-center justify-between w-full p-3 text-right hover:bg-gray-50 transition-colors focus:outline-none">
+                    <div class="flex items-center gap-3"><svg viewBox="0 0 20 20" fill="currentColor" width="24" height="24" class="text-gray-700"><path d="M1.82141 4.56839C1.82141 3.04961 3.05263 1.81839 4.57141 1.81839H15.4286C16.9473 1.81839 18.1786 3.04961 18.1786 4.56839V15.4255C18.1786 16.9443 16.9473 18.1755 15.4286 18.1755H4.57141C3.05263 18.1755 1.82141 16.9443 1.82141 15.4255V4.56839ZM4.57141 3.31839C3.88105 3.31839 3.32141 3.87803 3.32141 4.56839V15.4255C3.32141 16.1159 3.88105 16.6755 4.57141 16.6755H15.4286C16.1189 16.6755 16.6786 16.1159 16.6786 15.4255V4.56839C16.6786 3.87803 16.1189 3.31839 15.4286 3.31839H4.57141ZM6.28295 6.3898L6.28502 6.3898H6.28571C6.5604 6.3898 6.82384 6.49892 7.01808 6.69315C7.21231 6.88739 7.32143 7.15083 7.32143 7.42552C7.32143 7.63025 7.26075 7.83038 7.14707 8.00064C7.03338 8.17091 6.87179 8.30366 6.6827 8.38213C6.49361 8.4606 6.2855 8.48127 6.08467 8.44153C5.88384 8.40179 5.69929 8.30342 5.55433 8.15885C5.40937 8.01428 5.31051 7.82999 5.27024 7.62926C5.22996 7.42854 5.25008 7.22038 5.32805 7.03108C5.40602 6.84178 5.53834 6.67983 5.7083 6.56569C5.87825 6.45156 6.07822 6.39035 6.28295 6.3898ZM11.7308 8.54731C11.5156 8.54558 11.3032 8.59644 11.1122 8.69549C10.9218 8.79421 10.7583 8.93781 10.6359 9.11387L9.57506 10.6293L9.25659 10.3747C9.11353 10.2605 8.94829 10.1772 8.77136 10.1302C8.59443 10.0832 8.40966 10.0734 8.22876 10.1016C8.04787 10.1298 7.8748 10.1952 7.72053 10.2938C7.56634 10.3923 7.43413 10.522 7.33259 10.6742L5.39295 13.5806C5.23937 13.8107 5.22496 14.1067 5.35544 14.3507C5.48593 14.5946 5.74012 14.747 6.01679 14.747H15.1429C15.4191 14.747 15.673 14.5951 15.8037 14.3517C15.9344 14.1082 15.9206 13.8127 15.7679 13.5825L12.8194 9.13598L12.8175 9.13325C12.6978 8.95444 12.5363 8.80758 12.3468 8.70546C12.1574 8.60334 11.9459 8.54905 11.7308 8.54731ZM13.7456 13.247L11.7161 10.1864L10.3455 12.1444C10.2267 12.3141 10.0429 12.4272 9.83782 12.4567C9.63272 12.4861 9.42456 12.4295 9.26272 12.3001L8.47253 11.6683L7.41899 13.247H13.7456Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg><span class="text-gray-800 font-medium">Background</span></div>
+                    <div class="flex items-center gap-3"><div class="w-12 h-6 rounded-md" style="background-color: #e4daa0;"></div><svg viewBox="0 0 20 20" fill="currentColor" width="20" height="20" class="arrow text-gray-400 transform transition-transform duration-300"><path fill="currentColor" d="M12.76 10.56a.77.77 0 0 0 0-1.116L8.397 5.233a.84.84 0 0 0-1.157 0 .77.77 0 0 0 0 1.116l3.785 3.653-3.785 3.652a.77.77 0 0 0 0 1.117.84.84 0 0 0 1.157 0l4.363-4.211Z"></path></svg></div>
+                </button>
+                <div class="accordion-content bg-gray-50"><div class="p-4 space-y-4"><div class="relative"><select class="w-full p-2.5 border border-gray-300 rounded-md appearance-none text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"><option>Color</option></select><div class="pointer-events-none absolute inset-y-0 select-arrow flex items-center px-2 text-gray-700"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"></path></svg></div></div><div><h4 class="font-semibold text-gray-800 mb-2 text-sm">Default colors</h4><div class="grid grid-cols-6 gap-2"><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #457d50;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #5cb85c;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #9ccc65;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #c7a23c;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #fdd835;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #f5a623;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #2e7d32;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #4dd0e1;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #d2b48c;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #bc8f8f;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #f4511e;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #e57373;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #1e88e5;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #64b5f6;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #5e35b1;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #673ab7;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #ce93d8;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #d81b60;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #2962ff;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #3d5afe;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #c5cae9;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #b39ddb;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #ec407a;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #f48fb1;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #455a64;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #795548;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #78909c;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #b0bec5;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #90a4ae;"></div><div class="w-full aspect-square rounded-md cursor-pointer" style="background-color: #9fa8da;"></div></div></div><div><div class="flex justify-between items-center mb-2"><h4 class="font-semibold text-gray-800 text-sm">Custom colors</h4><button class="text-sm font-semibold text-gray-600 border border-gray-300 rounded-md px-3 py-1 hover:bg-gray-100">Edit</button></div><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-md" style="background-color: #e4daa0;"></div><div class="w-8 h-8 rounded-md flex items-center justify-center text-gray-500 text-2xl font-light cursor-pointer hover:bg-gray-200 border-2 border-dashed border-gray-300">+</div></div></div></div></div>
+            </div>
+
+            <!-- 3. פריט אקורדיון: לוגו וכותרת -->
+            <div class="accordion-item border border-gray-200 rounded-lg overflow-hidden">
+                <button class="accordion-toggle flex items-center justify-between w-full p-3 text-right hover:bg-gray-50 transition-colors focus:outline-none">
+                    <div class="flex items-center gap-3"><svg viewBox="0 0 20 20" fill="currentColor" width="24" height="24" class="text-gray-700"><path d="M1.82141 4.56839C1.82141 3.04961 3.05263 1.81839 4.57141 1.81839H15.4286C16.9473 1.81839 18.1786 3.04961 18.1786 4.56839V15.4255C18.1786 16.9443 16.9473 18.1755 15.4286 18.1755H4.57141C3.05263 18.1755 1.82141 16.9443 1.82141 15.4255V4.56839ZM4.57141 3.31839C3.88105 3.31839 3.32141 3.87803 3.32141 4.56839V15.4255C3.32141 16.1159 3.88105 16.6755 4.57141 16.6755H15.4286C16.1189 16.6755 16.6786 16.1159 16.6786 15.4255V4.56839C16.6786 3.87803 16.1189 3.31839 15.4286 3.31839H4.57141ZM6.28295 6.3898L6.28502 6.3898H6.28571C6.5604 6.3898 6.82384 6.49892 7.01808 6.69315C7.21231 6.88739 7.32143 7.15083 7.32143 7.42552C7.32143 7.63025 7.26075 7.83038 7.14707 8.00064C7.03338 8.17091 6.87179 8.30366 6.6827 8.38213C6.49361 8.4606 6.2855 8.48127 6.08467 8.44153C5.88384 8.40179 5.69929 8.30342 5.55433 8.15885C5.40937 8.01428 5.31051 7.82999 5.27024 7.62926C5.22996 7.42854 5.25008 7.22038 5.32805 7.03108C5.40602 6.84178 5.53834 6.67983 5.7083 6.56569C5.87825 6.45156 6.07822 6.39035 6.28295 6.3898ZM11.7308 8.54731C11.5156 8.54558 11.3032 8.59644 11.1122 8.69549C10.9218 8.79421 10.7583 8.93781 10.6359 9.11387L9.57506 10.6293L9.25659 10.3747C9.11353 10.2605 8.94829 10.1772 8.77136 10.1302C8.59443 10.0832 8.40966 10.0734 8.22876 10.1016C8.04787 10.1298 7.8748 10.1952 7.72053 10.2938C7.56634 10.3923 7.43413 10.522 7.33259 10.6742L5.39295 13.5806C5.23937 13.8107 5.22496 14.1067 5.35544 14.3507C5.48593 14.5946 5.74012 14.747 6.01679 14.747H15.1429C15.4191 14.747 15.673 14.5951 15.8037 14.3517C15.9344 14.1082 15.9206 13.8127 15.7679 13.5825L12.8194 9.13598L12.8175 9.13325C12.6978 8.95444 12.5363 8.80758 12.3468 8.70546C12.1574 8.60334 11.9459 8.54905 11.7308 8.54731ZM13.7456 13.247L11.7161 10.1864L10.3455 12.1444C10.2267 12.3141 10.0429 12.4272 9.83782 12.4567C9.63272 12.4861 9.42456 12.4295 9.26272 12.3001L8.47253 11.6683L7.41899 13.247H13.7456Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg><span class="text-gray-800 font-medium">Logo & header</span></div>
+                    <svg viewBox="0 0 20 20" fill="currentColor" width="20" height="20" class="arrow text-gray-400 transform transition-transform duration-300"><path fill="currentColor" d="M12.76 10.56a.77.77 0 0 0 0-1.116L8.397 5.233a.84.84 0 0 0-1.157 0 .77.77 0 0 0 0 1.116l3.785 3.653-3.785 3.652a.77.77 0 0 0 0 1.117.84.84 0 0 0 1.157 0l4.363-4.211Z"></path></svg>
+                </button>
+                 <div class="accordion-content bg-gray-50">
+                    <div class="p-4 space-y-4">
+                        <div id="logo-preview-container" class="hidden">
+                             <div class="relative group p-2 border rounded-md bg-white w-full">
+                                <img id="final-logo" src="#" alt="Cropped logo" class="w-full h-24 object-contain">
+                                <button id="delete-logo-btn" class="absolute top-2 right-2 bg-white p-1.5 rounded-full text-gray-500 hover:text-gray-800 hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <button id="open-modal-btn" class="w-full flex items-center justify-center gap-2 p-2.5 border border-gray-300 rounded-md bg-white text-gray-700 font-semibold hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></svg>
+                             Choose image
+                        </button>
+                        <div class="space-y-1"><label for="logo-alt" class="text-sm font-medium text-gray-700">Logo alt text</label><input type="text" id="logo-alt" value="LOGO" class="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <div class="space-y-1"><label for="header-align" class="text-sm font-medium text-gray-700">Header alignment</label><div class="relative"><select id="header-align" class="w-full p-2.5 border border-gray-300 rounded-md appearance-none text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"><option>Align with form</option></select><div class="pointer-events-none absolute inset-y-0 select-arrow flex items-center px-2 text-gray-700"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"></path></svg></div></div></div>
+                        <div class="space-y-1"><label for="logo-size" class="text-sm font-medium text-gray-700">Logo size</label><div class="relative"><select id="logo-size" class="w-full p-2.5 border border-gray-300 rounded-md appearance-none text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"><option>Medium</option></select><div class="pointer-events-none absolute inset-y-0 select-arrow flex items-center px-2 text-gray-700"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"></path></svg></div></div></div>
+                    </div>
+                 </div>
+            </div>
+
+            <!-- 4. פריט אקורדיון: פונט -->
+            <div class="accordion-item border border-gray-200 rounded-lg overflow-hidden">
+                <button class="accordion-toggle flex items-center justify-between w-full p-3 text-right hover:bg-gray-50 transition-colors focus:outline-none">
+                    <div class="flex items-center gap-3"><svg viewBox="0 0 20 20" fill="currentColor" width="24" height="24" class="text-gray-700"><path d="M4.75 5C4.75 4.86193 4.86193 4.75 5 4.75H9.24961V15.2498H7.5C7.08579 15.2498 6.75 15.5856 6.75 15.9998C6.75 16.414 7.08579 16.7498 7.5 16.7498H9.98232L9.99961 16.75L10.0169 16.7498H12.5C12.9142 16.7498 13.25 16.414 13.25 15.9998C13.25 15.5856 12.9142 15.2498 12.5 15.2498H10.7496V4.75H15C15.1381 4.75 15.25 4.86193 15.25 5V6C15.25 6.41421 15.5858 6.75 16 6.75C16.4142 6.75 16.75 6.41421 16.75 6V5C16.75 4.0335 15.9665 3.25 15 3.25H5C4.0335 3.25 3.25 4.0335 3.25 5V6C3.25 6.41421 3.58579 6.75 4 6.75C4.41421 6.75 4.75 6.41421 4.75 6V5Z" fill="currentColor"></path></svg><span class="text-gray-800 font-medium">Font</span></div>
+                    <div class="flex items-center gap-2"><span class="text-xs font-semibold text-gray-700 bg-gray-200 px-2.5 py-1 rounded-md">Open Sans</span><span class="text-xs font-semibold text-gray-700 bg-gray-200 px-2.5 py-1 rounded-md">Medium</span><svg viewBox="0 0 20 20" fill="currentColor" width="20" height="20" class="arrow text-gray-400 ml-1 transform transition-transform duration-300"><path fill="currentColor" d="M12.76 10.56a.77.77 0 0 0 0-1.116L8.397 5.233a.84.84 0 0 0-1.157 0 .77.77 0 0 0 0 1.116l3.785 3.653-3.785 3.652a.77.77 0 0 0 0 1.117.84.84 0 0 0 1.157 0l4.363-4.211Z"></path></svg></div>
+                </button>
+                <div class="accordion-content bg-gray-50"><div class="p-4 space-y-4"><div class="space-y-1"><div class="relative"><select class="w-full p-2.5 border border-gray-300 rounded-md appearance-none text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"><option>Open Sans</option></select><div class="pointer-events-none absolute inset-y-0 select-arrow flex items-center px-2 text-gray-700"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"></path></svg></div></div></div><div class="space-y-1"><label class="text-sm font-medium text-gray-700">Size</label><div class="relative"><select class="w-full p-2.5 border border-gray-300 rounded-md appearance-none text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"><option>Medium</option></select><div class="pointer-events-none absolute inset-y-0 select-arrow flex items-center px-2 text-gray-700"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"></path></svg></div></div></div><div class="space-y-1"><label class="text-sm font-medium text-gray-700">Text direction</label><div class="relative"><select class="w-full p-2.5 border border-gray-300 rounded-md appearance-none text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"><option>Left to right</option></select><div class="pointer-events-none absolute inset-y-0 select-arrow flex items-center px-2 text-gray-700"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"></path></svg></div></div></div></div></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Image Upload -->
+    <div id="upload-modal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 transition-opacity duration-300">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 m-4 transform transition-all duration-300 ease-out">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Add Logo</h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 focus:outline-none"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <div id="modal-body">
+                <div id="upload-initial-state">
+                    <label for="file-upload" id="drop-zone" class="flex flex-col items-center justify-center w-full h-56 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-10 h-10 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"></path></svg>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Choose a file to upload</span> or drag and drop here</p>
+                            <p class="text-xs text-gray-500">8 MB max file size</p>
+                        </div>
+                        <input id="file-upload" type="file" class="hidden" accept="image/*" />
+                    </label>
+                </div>
+                <div id="upload-preview-state" class="hidden">
+                     <div class="img-container">
+                        <img id="image-to-crop" src="#" alt="Image Preview"/>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end items-center gap-3 mt-6">
+                <button id="cancel-btn" class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:outline-none">Cancel</button>
+                <button id="upload-btn" class="px-6 py-2.5 text-sm font-semibold text-white bg-teal-500 rounded-lg hover:bg-teal-600 focus:outline-none disabled:bg-gray-300" disabled>Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let cropper = null;
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            
+            const logoAccordionItem = accordionItems[2];
+            if (logoAccordionItem) {
+                logoAccordionItem.querySelector('.accordion-toggle').click();
+            }
+
+            accordionItems.forEach(item => {
+                const toggle = item.querySelector('.accordion-toggle');
+                toggle.addEventListener('click', () => {
+                    const isOpen = item.classList.contains('open');
+                    accordionItems.forEach(otherItem => {
+                        if (otherItem !== item) {
+                            otherItem.classList.remove('open');
+                            otherItem.querySelector('.accordion-content').style.maxHeight = '0px';
+                            const otherArrow = otherItem.querySelector('.arrow');
+                            if(otherArrow) otherArrow.style.transform = 'rotate(0deg)';
+                            otherItem.style.borderColor = '#E5E7EB';
+                        }
+                    });
+                    const content = item.querySelector('.accordion-content');
+                    const arrow = item.querySelector('.arrow');
+                    if (isOpen) {
+                        item.classList.remove('open');
+                        content.style.maxHeight = '0px';
+                        if(arrow) arrow.style.transform = 'rotate(0deg)';
+                        item.style.borderColor = '#E5E7EB';
+                    } else {
+                        item.classList.add('open');
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        if(arrow) arrow.style.transform = 'rotate(90deg)';
+                        item.style.borderColor = '#3B82F6';
+                    }
+                });
+            });
+
+            const modal = document.getElementById('upload-modal');
+            const openModalBtn = document.getElementById('open-modal-btn');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const uploadBtn = document.getElementById('upload-btn');
+            const dropZone = document.getElementById('drop-zone');
+            const fileUpload = document.getElementById('file-upload');
+            const imageToCrop = document.getElementById('image-to-crop');
+            const initialState = document.getElementById('upload-initial-state');
+            const previewState = document.getElementById('upload-preview-state');
+            const finalLogo = document.getElementById('final-logo');
+            const logoPreviewContainer = document.getElementById('logo-preview-container');
+            const deleteLogoBtn = document.getElementById('delete-logo-btn');
+
+            const openModal = () => modal.classList.remove('hidden');
+            const closeModal = () => {
+                modal.classList.add('hidden');
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+                initialState.classList.remove('hidden');
+                previewState.classList.add('hidden');
+                imageToCrop.src = '#';
+                uploadBtn.disabled = true;
+                fileUpload.value = '';
+            };
+
+            openModalBtn.addEventListener('click', openModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            
+            function handleFile(file) {
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        imageToCrop.src = e.target.result;
+                        initialState.classList.add('hidden');
+                        previewState.classList.remove('hidden');
+                        if (cropper) {
+                            cropper.destroy();
+                        }
+                        cropper = new Cropper(imageToCrop, {
+                            aspectRatio: 16/9,
+                            viewMode: 1,
+                            background: false,
+                            responsive: true,
+                            restore: true,
+                        });
+                        uploadBtn.disabled = false;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+            
+            uploadBtn.addEventListener('click', () => {
+                if (cropper) {
+                    const canvas = cropper.getCroppedCanvas();
+                    finalLogo.src = canvas.toDataURL();
+                    logoPreviewContainer.classList.remove('hidden');
+                    openModalBtn.classList.add('hidden');
+                    closeModal();
+                }
+            });
+
+            deleteLogoBtn.addEventListener('click', () => {
+                finalLogo.src = '#';
+                logoPreviewContainer.classList.add('hidden');
+                openModalBtn.classList.remove('hidden');
+            });
+
+            fileUpload.addEventListener('change', (e) => { handleFile(e.target.files[0]); });
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-blue-500', 'bg-blue-50'); });
+            dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-blue-500', 'bg-blue-50'); });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+                handleFile(e.dataTransfer.files[0]);
+            });
+        });
+    </script>
+
+</body>
+</html>
+

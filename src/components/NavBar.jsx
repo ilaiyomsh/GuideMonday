@@ -1,10 +1,14 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useGuide } from '../context/GuideContext';
-import { Home, NavigationChevronRight, NavigationChevronLeft, Edit, Check, Download, Upload, ClassicFolder } from '@vibe/icons';
+import { Home, NavigationChevronRight, NavigationChevronLeft, Edit, Check, Download, Upload, Gallery, Broom } from '@vibe/icons';
+import { Dialog, DialogContentContainer } from '@vibe/core';
 import SearchBar from './SearchBar';
+import StyleSettings from './StyleSettings';
 
-export default function NavBar({ currentPage, currentChapterId, onNavigate }) {
+export default function NavBar({ currentPage, currentChapterId, onNavigate, onOpenUploadModal }) {
   const fileInputRef = useRef(null);
+  const [showStyleSettings, setShowStyleSettings] = useState(false);
+  
   const { 
     guideData, 
     isEditMode, 
@@ -12,8 +16,10 @@ export default function NavBar({ currentPage, currentChapterId, onNavigate }) {
     isOwner, 
     handleSave,
     mediaBoardState,
-    loadGuideData
+    loadGuideData,
+    handleUpdateStyleSettings
   } = useGuide();
+
 
   if (!guideData) return null;
 
@@ -206,6 +212,15 @@ export default function NavBar({ currentPage, currentChapterId, onNavigate }) {
           {isEditMode && (
             <div className="navbar-edit-actions">
               <button 
+                className="navbar-style-button" 
+                onClick={() => setShowStyleSettings(true)}
+                title="התאמה אישית - עיצוב"
+              >
+                <Broom />
+              </button>
+
+
+              <button 
                 className="navbar-save-button" 
                 onClick={handleSaveClick}
                 title="שמור שינויים"
@@ -235,7 +250,7 @@ export default function NavBar({ currentPage, currentChapterId, onNavigate }) {
                   onClick={handleOpenMediaBoard}
                   title="פתח לוח מדיה"
                 >
-                  <ClassicFolder />
+                  <Gallery />
                 </button>
               )}
 
@@ -250,6 +265,27 @@ export default function NavBar({ currentPage, currentChapterId, onNavigate }) {
           )}
         </div>
       )}
+
+      {/* Style Settings Dialog */}
+      <StyleSettings
+        isOpen={showStyleSettings}
+        onClose={() => setShowStyleSettings(false)}
+        guideData={guideData}
+        onUpdateStyle={(styleUpdates) => {
+          // עדכון הגדרות עיצוב
+          if (styleUpdates.globalBackground !== undefined) {
+            handleUpdateGlobalBackground(styleUpdates.globalBackground);
+          }
+          // עדכון לוגו
+          if (styleUpdates.logo !== undefined) {
+            handleUpdateStyleSettings({
+              logo: styleUpdates.logo
+            });
+          }
+          // כאן נוסיף בעתיד עדכונים נוספים כמו primaryColor, fontFamily וכו'
+        }}
+        onOpenUploadModal={onOpenUploadModal}
+      />
     </div>
   );
 }

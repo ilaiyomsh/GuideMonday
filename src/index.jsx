@@ -2,6 +2,7 @@ import "./init";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "./styles/index.css";
+import "./styles/table-of-contents.css";
 import App from "./App";
 import { GuideProvider } from "./context/GuideContext.jsx";
 

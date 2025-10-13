@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGuide } from '../context/GuideContext';
 import { MoveArrowUp, MoveArrowDown, Delete, Edit } from '@vibe/icons';
 import ContentBlockEditDialog from './ContentBlockEditDialog';
@@ -9,14 +9,30 @@ export default function ContentBlock({ block, isEditMode, chapterId, sectionId, 
   const { handleDeleteContentBlock, handleReorderContentBlock, direction } = useGuide();
   const [isHovered, setIsHovered] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const prevIsNewBlockRef = useRef(false);
+  const hasOpenedOnceRef = useRef(false);
+
+  // אפס את ה-ref כשמשנים בלוק
+  useEffect(() => {
+    hasOpenedOnceRef.current = false;
+    prevIsNewBlockRef.current = false;
+  }, [block.id]);
 
   // פתיחה אוטומטית של דיאלוג עריכה לבלוק חדש
+  // רץ רק כש-isNewBlock משתנה מ-false ל-true (בלוק חדש נוצר)
   useEffect(() => {
-    if (isEditMode && isNewBlock) {
-      // פתח את הדיאלוג גם אם הבלוק לא ריק
+    // פתח את הדיאלוג רק אם:
+    // 1. במצב עריכה
+    // 2. isNewBlock=true והערך הקודם היה false (בלוק חדש באמת נוצר)
+    // 3. לא נפתח כבר פעם אחת (למנוע פתיחה חוזרת)
+    if (isEditMode && isNewBlock && !prevIsNewBlockRef.current && !hasOpenedOnceRef.current) {
+      console.log('📝 פותח דיאלוג עריכה לבלוק חדש:', block.type);
       setIsEditDialogOpen(true);
+      hasOpenedOnceRef.current = true;
     }
-  }, [isEditMode, isNewBlock]);
+    // עדכן את הערך הקודם
+    prevIsNewBlockRef.current = isNewBlock;
+  }, [isNewBlock, isEditMode, block.type, block.id]);
 
   const getFontSize = (size) => {
     return `${size}px`;

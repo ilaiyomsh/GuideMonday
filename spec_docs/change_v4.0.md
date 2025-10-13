@@ -1809,6 +1809,425 @@ return (
 
 ---
 
+## עדכון 20: הוספת כפתורי שינוי סדר ומחיקה לפרקים במסך הבית
+
+### תאריך: דצמבר 2024
+
+### בעיה:
+במסך הבית במצב עריכה, לפרקים היה רק כפתור עריכה, ללא אפשרות לשנות סדר או למחוק פרקים.
+
+### פתרון:
+הוספת כפתורי בקרה מלאים לפרקים במסך הבית, זהה לכפתורי הבקרה של הסעיפים.
+
+#### 1. HomePage.jsx
+
+**לפני:**
+```jsx
+{isEditMode && (
+  <button 
+    className="chapter-edit-button"
+    onClick={(e) => handleEditChapter(chapter, e)}
+    title="ערוך פרק"
+  >
+    <Edit />
+  </button>
+)}
+```
+
+**אחרי:**
+```jsx
+{isEditMode && (
+  <div className="chapter-controls">
+    <button 
+      className="chapter-edit-button"
+      onClick={(e) => handleEditChapter(chapter, e)}
+      title="ערוך פרק"
+    >
+      <Edit />
+    </button>
+    <button 
+      className="chapter-reorder-button"
+      onClick={(e) => handleReorderChapterClick(chapter.id, 'up', e)}
+      disabled={index === 0}
+      title="הזז למעלה"
+    >
+      <MoveArrowUp />
+    </button>
+    <button 
+      className="chapter-reorder-button"
+      onClick={(e) => handleReorderChapterClick(chapter.id, 'down', e)}
+      disabled={index === guideData.chapters.length - 1}
+      title="הזז למטה"
+    >
+      <MoveArrowDown />
+    </button>
+    <button 
+      className="chapter-delete-button"
+      onClick={(e) => handleDeleteChapterClick(chapter.id, e)}
+      title="מחק פרק"
+    >
+      <Delete />
+    </button>
+  </div>
+)}
+```
+
+#### 2. page-header.css
+
+**לפני:**
+```css
+.chapter-control-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-small);
+  transition: background-color 0.2s;
+  width: 24px;
+  height: 24px;
+}
+```
+
+**אחרי:**
+```css
+.chapter-control-button,
+.chapter-edit-button,
+.chapter-reorder-button,
+.chapter-delete-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-small);
+  transition: background-color 0.2s;
+  width: 24px;
+  height: 24px;
+}
+
+.chapter-delete-button:hover svg {
+  color: var(--danger-color);
+}
+```
+
+### פונקציונליות:
+- **עריכה**: פתיחת תיבת עריכה לכותרת ותיאור הפרק
+- **שינוי סדר**: כפתורי חצים למעלה/למטה עם disable state
+- **מחיקה**: כפתור מחיקה עם אישור
+- **עיצוב אחיד**: זהה לכפתורי הבקרה של הסעיפים
+
+### תיקון נוסף:
+**בעיה:** כפתור המחיקה לא הופיע כי כפתור העריכה הנפרד הסתיר אותו
+**פתרון:** 
+1. תיקון עיצוב הכפתורים להתאים לכפתורי הסעיפים (padding: 6px, width/height: 28px)
+2. תיקון CSS selector מ-`.edit-mode-active` ל-`.edit-mode-active`
+3. הוספת gap: 4px בין הכפתורים
+4. **הסרת הגדרות CSS נפרדות לכפתור העריכה** - הסרתי את ההגדרות שהציבו את כפתור העריכה בנפרד עם מסגרת עצמאית
+
+## עדכון 21: שינוי גופן לאפליקציה ל-Open Sans
+
+### תאריך: דצמבר 2024
+
+### שינוי:
+החלפת הגופן הראשי של האפליקציה מ-Figtree ל-Open Sans בכל המקומות.
+
+#### 1. variables.css
+**לפני:**
+```css
+--font-family-base: 'Figtree', sans-serif;
+```
+
+**אחרי:**
+```css
+--font-family-base: 'Open Sans', sans-serif;
+```
+
+#### 2. index.css
+**הוספת import של Google Fonts:**
+```css
+/* 0. Google Fonts - Must be first */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+```
+
+### השפעה:
+- כל הטקסט באפליקציה עכשיו משתמש ב-Open Sans
+- גופני מונוספייס לקוד נשארו ללא שינוי (SF Mono, Fira Code)
+- הגופן נטען מ-Google Fonts עם כל המשקלים והסגנונות
+
+### בדיקות:
+- [x] כפתורי בקרה מופיעים רק במצב עריכה
+- [x] כפתורי שינוי סדר מושבתים בקצוות
+- [x] כפתור מחיקה מופיע ופועל
+- [x] עיצוב אחיד עם כפתורי סעיפים
+- [x] tooltips לכל כפתור
+
+## עדכון 22: שיפור עיצוב כותרת הסעיף
+
+### תאריך: דצמבר 2024
+
+### שינוי:
+שיפור עיצוב כותרת הסעיף כדי שתיראה יותר כמו כותרת אמיתית - ביניים בין טקסט רגיל לכותרת פרק.
+
+#### sections.css
+
+**לפני:**
+```css
+.section-accordion-toggle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.section-toggle-button {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+```
+
+**אחרי:**
+```css
+.section-accordion-toggle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  /* הסרת border-bottom */
+}
+
+.section-toggle-button {
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+```
+
+### היררכיית גופנים:
+- **כותרת פרק**: 2.2rem, font-weight: 700
+- **כותרת סעיף**: 1.8rem, font-weight: 600 ← **חדש**
+- **טקסט רגיל**: 1.1rem, font-weight: 400
+
+### השפעה:
+- כותרת הסעיף נראית יותר כמו כותרת אמיתית
+- הסרת הקו המפריד התחתון למראה נקי יותר
+- היררכיה ויזואלית ברורה בין רמות התוכן השונות
+
+## עדכון 23: הוספת רקע כחול בהיר לסעיפים
+
+### תאריך: דצמבר 2024
+
+### שינוי:
+הוספת רקע כחול בהיר לכל סעיף עם הפרדה ברורה בין סעיפים שונים.
+
+#### 1. variables.css
+**הוספת משתנה צבע חדש:**
+```css
+--section-background-color: #e8f4fd;
+```
+
+#### 2. sections.css
+
+**לפני:**
+```css
+.section {
+  position: relative;
+  margin-bottom: var(--spacing-large);
+  clear: both;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.section-content {
+  background-color: var(--surface-color);
+  border-top: 1px solid var(--border-color);
+  margin-top: -1px;
+}
+```
+
+**אחרי:**
+```css
+.section {
+  position: relative;
+  margin-bottom: var(--spacing-large);
+  clear: both;
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: var(--section-background-color);
+  border-radius: var(--border-radius-large);
+  padding: var(--spacing-medium);
+}
+
+.section-content {
+  background-color: var(--section-background-color);
+  margin-top: var(--spacing-small);
+  /* הסרת border-top */
+}
+```
+
+### השפעה:
+- כל סעיף עכשיו עם רקע כחול בהיר (#e8f4fd)
+- הפרדה ברורה בין סעיפים שונים עם מרווחים ופינות מעוגלות
+- מראה נקי ונעים לעין עם קונטרסט טוב לקריאה
+- עיצוב עקבי עם מערכת הצבעים של האפליקציה
+
+#### 3. blocks.css - וידוא רקע לבן לבלוקים
+
+**הוספה מפורשת:**
+```css
+.content-block {
+  background-color: var(--surface-color); /* לבן */
+}
+```
+
+### תיקון:
+**בעיה:** רקע הבלוקים צריך להישאר לבן
+**פתרון:** הוספתי `background-color: var(--surface-color)` מפורשת לבלוקים כדי לוודא שהם נשארים לבנים על רקע הסעיף הכחול
+
+## עדכון 24: הסרת טקסט ברירת מחדל מכרטיסי פרקים
+
+### תאריך: דצמבר 2024
+
+### שינוי:
+הסרת טקסט ברירת המחדל "תיאור הפרק יופיע כאן" מכרטיסי הפרקים במסך הבית.
+
+#### 1. HomePage.jsx
+
+**לפני:**
+```jsx
+<p>{chapter.description || chapter.content || 'תיאור הפרק יופיע כאן'}</p>
+```
+
+**אחרי:**
+```jsx
+<p>{chapter.description || chapter.content}</p>
+```
+
+#### 2. guideService.js
+
+**לפני:**
+```js
+const newChapter = {
+  id: generateId('chap'),
+  title: 'פרק חדש',
+  content: 'תיאור הפרק יופיע כאן.',
+  sections: []
+};
+```
+
+**אחרי:**
+```js
+const newChapter = {
+  id: generateId('chap'),
+  title: 'פרק חדש',
+  content: '',
+  sections: []
+};
+```
+
+### השפעה:
+- כרטיסי פרקים ללא תיאור יוצגו ללא טקסט במקום הטקסט ברירת המחדל
+- פרקים חדשים נוצרים עם תיאור ריק
+- מראה נקי יותר לכרטיסים ללא תיאור
+
+## עדכון 25: הוספת הצללה לבלוקים
+
+### תאריך: דצמבר 2024
+
+### שינוי:
+הוספת הצללה לרקע של כל בלוק תוכן.
+
+#### blocks.css
+
+**לפני:**
+```css
+.content-block {
+  position: relative;
+  margin-bottom: var(--spacing-large);
+  padding: var(--spacing-medium);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-medium);
+  background-color: var(--surface-color);
+  clear: both;
+  overflow-x: hidden;
+  overflow-y: visible;
+  min-height: 120px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+```
+
+**אחרי:**
+```css
+.content-block {
+  position: relative;
+  margin-bottom: var(--spacing-large);
+  padding: var(--spacing-medium);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-medium);
+  background-color: var(--surface-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  clear: both;
+  overflow-x: hidden;
+  overflow-y: visible;
+  min-height: 120px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+```
+
+### השפעה:
+- כל בלוק תוכן עכשיו עם הצללה עדינה (0 2px 8px rgba(0, 0, 0, 0.1))
+- מראה תלת-ממדי ונעים יותר לבלוקים
+- הפרדה ויזואלית טובה יותר בין הבלוקים לרקע
+- עיצוב מודרני ומקצועי יותר
+
+## עדכון 26: הוספת הצללה לסעיפים
+
+### תאריך: דצמבר 2024
+
+### שינוי:
+הוספת הצללה לסעיף כולו עם הרקע הכחול בהיר.
+
+#### sections.css
+
+**לפני:**
+```css
+.section {
+  position: relative;
+  margin-bottom: var(--spacing-large);
+  clear: both;
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: var(--section-background-color);
+  border-radius: var(--border-radius-large);
+  padding: var(--spacing-medium);
+}
+```
+
+**אחרי:**
+```css
+.section {
+  position: relative;
+  margin-bottom: var(--spacing-large);
+  clear: both;
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: var(--section-background-color);
+  border-radius: var(--border-radius-large);
+  padding: var(--spacing-medium);
+  box-shadow: 0 4px 12px rgba(0, 115, 234, 0.15);
+}
+```
+
+### השפעה:
+- כל סעיף עכשיו עם הצללה כחולה עדינה (0 4px 12px rgba(0, 115, 234, 0.15))
+- הצללה חזקה יותר מהבלוקים (4px במקום 2px) כדי להדגיש את הסעיף
+- הצללה בצבע כחול שמתאים לרקע הכחול של הסעיף
+- מראה תלת-ממדי מרשים יותר עם היררכיה ברורה: סעיף → בלוקים
+
+---
+
 ### שינויים ב-CSS
 
 #### קובץ: `src/styles/base.css`

@@ -4,6 +4,7 @@
  */
 
 import { generateId } from '../utils/helpers';
+import { autoMigrate, needsMigration, createBackup } from '../utils/migration';
 
 /**
  * Update home page data
@@ -45,7 +46,7 @@ export const addChapter = (guideData) => {
   const newChapter = {
     id: generateId('chap'),
     title: 'פרק חדש',
-    content: 'תיאור הפרק יופיע כאן.',
+    content: '',
     sections: []
   };
   return {
@@ -252,3 +253,38 @@ export const reorderContentBlock = (guideData, chapterId, sectionId, blockIndex,
     })
   };
 };
+
+// ============================================
+// Background Management Functions
+// ============================================
+// NOTE: Background management moved to styleService.js in v4.0
+
+/**
+ * Load guide data with automatic migration
+ */
+export const loadGuideWithMigration = (guideData) => {
+  // יצירת גיבוי אם נדרשת מיגרציה
+  if (needsMigration(guideData)) {
+    const backup = createBackup(guideData);
+    console.log('מדריך זקוק למיגרציה, גיבוי נוצר:', backup);
+    
+    // הפעלת מיגרציה אוטומטית
+    const migratedGuide = autoMigrate(guideData);
+    console.log('מיגרציה הושלמה:', migratedGuide);
+    
+    return {
+      guideData: migratedGuide,
+      wasMigrated: true,
+      backup: backup
+    };
+  }
+  
+  return {
+    guideData: guideData,
+    wasMigrated: false,
+    backup: null
+  };
+};
+
+// NOTE: Style management moved to styleService.js in v4.0
+// updateStyleSettings is now handled by styleService functions
