@@ -2,8 +2,8 @@
 :root {
   --primary-color: #0073ea;
   --primary-hover-color: #0060b9;
-  --primary-text-color: #323338;
-  --secondary-text-color: #676879;
+  --primary-text-color: #1F2328; /* טקסט ראשי כהה לניגודיות AA */
+  --secondary-text-color: #667085; /* טקסט משני */
   --border-color: #d0d4e4;
   --surface-color: #ffffff;
   --neutral-background-color: #f5f6f8;
@@ -22,4 +22,10 @@
   --border-radius-medium: 6px;
   --border-radius-large: 8px;
   --border-radius-pill: 99em;
+
+  /* UX quick wins */
+  --focus-ring: rgba(0, 115, 234, 0.35);
+  --edit-mode-color: #f59e0b; /* פס עליון ובאדג' מצב עריכה */
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.08);
 }

@@ -29,7 +29,7 @@
 
 .toc-header h3 {
   margin: 0;
-  color: #666666; /* אפור */
+  color: var(--toc-text-heading, #666666); /* דינמי לפי רקע, fallback: אפור */
   font-size: 1.1rem;
   font-weight: 600;
   text-align: right;
@@ -77,11 +77,11 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: calc(var(--spacing-small) / 2);
+  padding: 6px 12px;
   padding-right: var(--spacing-large); /* הזחה פנימה */
   background: none;
   border: none;
-  color: #666666; /* אפור */
+  color: var(--toc-text-normal, #666666); /* דינמי - דהוי */
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -91,17 +91,17 @@
 }
 
 .toc-link:hover {
-  color: rgb(0, 0, 0); /* שחור בהובר */
+  color: var(--toc-text-hover, rgb(0, 0, 0)); /* דינמי - hover */
   transform: translateX(-2px);
 }
 
 .toc-link:active {
-  color: rgb(0, 0, 0); /* שחור בלחיצה */
+  color: var(--toc-text-active, rgb(0, 0, 0)); /* דינמי - לחיצה */
   transform: translateX(-1px);
 }
 
 .toc-link.active {
-  color: rgb(0, 0, 0) !important; /* שחור לסעיף הפעיל */
+  color: var(--toc-text-active, rgb(0, 0, 0)) !important; /* דינמי - סעיף פעיל */
   font-weight: 600; /* הדגשה נוספת */
 }
 
@@ -111,10 +111,13 @@
   text-align: right;
   word-wrap: break-word;
   hyphens: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .toc-empty {
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--toc-text-normal, rgba(0, 0, 0, 0.6)); /* דינמי */
   text-align: center;
   font-style: italic;
   margin: var(--spacing-medium) 0;

@@ -1,12 +1,12 @@
 /* Content Block Styles */
 .content-block {
   position: relative;
-  margin-bottom: var(--spacing-large);
+  margin-bottom: 24px;
   padding: var(--spacing-medium);
-  border: 1px solid var(--border-color);
+  border: 1px solid #e7eaf3; /* בהיר יותר */
   border-radius: var(--border-radius-medium);
   background-color: white;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
   clear: both;
   overflow-x: hidden;
   overflow-y: visible;
@@ -75,16 +75,16 @@
 }
 
 .rich-text-content p {
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--spacing-medium) 0;
 }
 
 .rich-text-content ul, .rich-text-content ol {
-  margin: 8px 0;
+  margin: var(--spacing-medium) 0;
   padding-right: 20px;
 }
 
 .rich-text-content li {
-  margin: 4px 0;
+  margin: 6px 0;
 }
 
 .rich-text-content strong, .rich-text-content b {
@@ -102,7 +102,7 @@
 /* Media Wrapper - אחיד לכל סוגי המדיה */
 .block-media-wrapper {
   width: 100%;
-  margin: var(--spacing-medium) 0;
+  margin: 20px 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -160,6 +160,7 @@
   background: #000; 
   border-radius: var(--border-radius-medium);
   overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
 
 .block-media-wrapper .video-container iframe,

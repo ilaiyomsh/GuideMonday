@@ -90,6 +90,10 @@ export default function NavBar({ currentPage, currentChapterId, onNavigate, onOp
 
   const handleSaveClick = async () => {
     await handleSave();
+    try {
+      const evt = new CustomEvent('guide:saved', { detail: { ts: Date.now() } });
+      window.dispatchEvent(evt);
+    } catch {}
   };
 
   // הורדת המדריך הנוכחי כ-JSON
@@ -212,20 +216,19 @@ export default function NavBar({ currentPage, currentChapterId, onNavigate, onOp
           {isEditMode && (
             <div className="navbar-edit-actions">
               <button 
-                className="navbar-style-button" 
-                onClick={() => setShowStyleSettings(true)}
-                title="התאמה אישית - עיצוב"
-              >
-                <Broom />
-              </button>
-
-
-              <button 
                 className="navbar-save-button" 
                 onClick={handleSaveClick}
                 title="שמור שינויים"
               >
                 <Check />
+              </button>
+
+              <button 
+                className="navbar-style-button" 
+                onClick={() => setShowStyleSettings(true)}
+                title="התאמה אישית - עיצוב"
+              >
+                <Broom />
               </button>
 
               <button 

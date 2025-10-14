@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useGuide } from '../context/GuideContext';
 
 export default function TableOfContents({ sections = [], chapterTitle = '' }) {
+  const { tocTextColors } = useGuide();  // קבלת צבעי טקסט דינמיים
   const [activeSection, setActiveSection] = useState(null);
 
   const handleSectionClick = (sectionId) => {
@@ -47,7 +49,15 @@ export default function TableOfContents({ sections = [], chapterTitle = '' }) {
 
   if (!sections || sections.length === 0) {
     return (
-      <div className="table-of-contents">
+      <div 
+        className="table-of-contents"
+        style={{
+          '--toc-text-normal': tocTextColors.normal,
+          '--toc-text-hover': tocTextColors.hover,
+          '--toc-text-active': tocTextColors.active,
+          '--toc-text-heading': tocTextColors.heading
+        }}
+      >
         <div className="toc-header">
           <h3>{chapterTitle || 'תוכן עניינים'}</h3>
         </div>
@@ -59,7 +69,15 @@ export default function TableOfContents({ sections = [], chapterTitle = '' }) {
   }
 
   return (
-    <div className="table-of-contents">
+    <div 
+      className="table-of-contents"
+      style={{
+        '--toc-text-normal': tocTextColors.normal,
+        '--toc-text-hover': tocTextColors.hover,
+        '--toc-text-active': tocTextColors.active,
+        '--toc-text-heading': tocTextColors.heading
+      }}
+    >
       <div className="toc-header">
         <h3>{chapterTitle || 'תוכן עניינים'}</h3>
       </div>
@@ -70,7 +88,7 @@ export default function TableOfContents({ sections = [], chapterTitle = '' }) {
               <button 
                 className={`toc-link ${activeSection === section.id ? 'active' : ''}`}
                 onClick={() => handleSectionClick(section.id)}
-                title={`עבור לסעיף: ${section.title}`}
+                
               >
                 <span className="toc-title">{section.title}</span>
               </button>

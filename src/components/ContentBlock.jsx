@@ -91,6 +91,7 @@ export default function ContentBlock({ block, isEditMode, chapterId, sectionId, 
             src={data.url} 
             title={data.title || 'Video'} 
             frameBorder="0" 
+            loading="lazy"
             allowFullScreen 
           />
         );

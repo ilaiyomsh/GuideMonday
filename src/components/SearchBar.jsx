@@ -10,6 +10,8 @@ export default function SearchBar({ onNavigate }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [fuse, setFuse] = useState(null);
   const searchRef = useRef(null);
+  const triggerButtonRef = useRef(null);
+  const inputRef = useRef(null);
 
   // סגירת החיפוש בלחיצה מחוץ לקומפוננטה
   useEffect(() => {
@@ -46,6 +48,30 @@ export default function SearchBar({ onNavigate }) {
     
     setFuse(fuseInstance);
   }, [guideData]);
+
+  // קיצורי מקלדת לפתיחת/סגירת החיפוש
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      const isCmdK = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k';
+      const isSlash = e.key === '/';
+      const isEsc = e.key === 'Escape';
+
+      if (!isSearchOpen && (isCmdK || isSlash)) {
+        e.preventDefault();
+        setIsSearchOpen(true);
+        setTimeout(() => inputRef.current?.focus(), 0);
+      } else if (isSearchOpen && isEsc) {
+        e.preventDefault();
+        setIsSearchOpen(false);
+        setSearchTerm('');
+        setSearchResults([]);
+        triggerButtonRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isSearchOpen]);
 
   // פונקציה לבניית אינדקס
   const buildSearchIndex = (data) => {
@@ -122,14 +148,17 @@ export default function SearchBar({ onNavigate }) {
   // חיפוש
   const handleSearch = (term) => {
     setSearchTerm(term);
-    
-    if (!term.trim() || !fuse) {
+    if (!fuse) return;
+    if (!term.trim()) {
       setSearchResults([]);
       return;
     }
-    
-    const results = fuse.search(term);
-    setSearchResults(results.slice(0, 10));
+    // דיבאונס פשוט
+    clearTimeout(handleSearch._t);
+    handleSearch._t = setTimeout(() => {
+      const results = fuse.search(term);
+      setSearchResults(results.slice(0, 10));
+    }, 200);
   };
 
   // ניווט לתוצאה
@@ -187,23 +216,30 @@ export default function SearchBar({ onNavigate }) {
     <div className="search-bar" ref={searchRef}>
       <button 
         className="search-trigger"
-        onClick={() => setIsSearchOpen(!isSearchOpen)}
+        onClick={() => {
+          setIsSearchOpen(!isSearchOpen);
+          setTimeout(() => inputRef.current?.focus(), 0);
+        }}
         title="חיפוש במדריך"
+        aria-label="חיפוש במדריך"
+        aria-expanded={isSearchOpen}
+        aria-controls="search-panel"
+        ref={triggerButtonRef}
       >
         <Search />
       </button>
       
       {isSearchOpen && (
-        <div className="search-panel">
+        <div className="search-panel" id="search-panel" role="dialog" aria-modal="false">
           <div className="search-input-wrapper">
             <Search className="search-icon" />
             <input
               type="text"
               className="search-input"
-              placeholder="חיפוש במדריך..."
+              placeholder="חפשו פרק או סעיף…"
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
-              autoFocus
+              ref={inputRef}
             />
             {searchTerm && (
               <button 
@@ -211,7 +247,9 @@ export default function SearchBar({ onNavigate }) {
                 onClick={() => {
                   setSearchTerm('');
                   setSearchResults([]);
+                  inputRef.current?.focus();
                 }}
+                aria-label="נקה חיפוש"
               >
                 <Close />
               </button>
